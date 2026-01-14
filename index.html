@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>108課綱學測國文全攻略</title>
+    <title>108課綱學測國文全攻略 (增量版)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -147,7 +147,6 @@
         .res-header { font-weight: 800; font-size: 1.1rem; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
         .res-body { font-size: 0.95rem; line-height: 1.6; opacity: 0.9; }
 
-        /* Generic Modal */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000;
@@ -188,8 +187,9 @@
 </div>
 
 <script>
+    const QUESTION_LIMIT = 150; // 將題目數量上限提升至 150
+
     // --- 資料庫區塊 ---
-    
     // 1. 成語資料庫
     const IDIOM_DB = [
         { idm: "空穴來風", m: "比喻事出有因", r: "這件事絕非空穴來風，必有其依據。", w: "這些謠言純屬空穴來風，完全沒有根據。" },
@@ -272,7 +272,7 @@
         { s: "兩情若是久長時，又豈在朝朝暮暮", a: "秦觀", t: "鵲橋仙", q: "這句詞的主題是？", ans: "愛情" }
     ];
 
-    // 4. 文章賞析題庫種子 (各類文章範本)
+    // 4. 文章賞析題庫種子
     const READING_PASSAGES = [
         {
             title: "應用文：圖書館閉館公告",
@@ -336,7 +336,7 @@
         }
     ];
 
-    // 5. 國寫題目 (修復版：包含完整解析)
+    // 5. 國寫題目種子 (歷屆)
     const WRITING_TOPICS = [
         { t: "關於經驗的N種思考", hint: "請以個人經驗出發，論述經驗的正反面影響。", a: "【閱卷重點與佳作特質】\n1. 立意取材：能辯證「經驗」的雙面性。經驗既是智慧的累積，也可能成為創新的框架或偏見的來源。\n2. 結構組織：建議採「正、反、合」的論述結構，先肯定經驗價值，再反思其侷限。\n3. 遣詞造句：若能舉出具體例證（如老馬識途vs.守株待兔）佐證論點，將更具說服力。" },
         { t: "歪腰郵筒", hint: "從新聞事件中觀察社會現象，並提出個人見解。", a: "【閱卷重點與佳作特質】\n1. 核心觀點：不應僅止於描述事件，應深入探討現象背後的社會心理。\n2. 深度反思：可連結至當代人面對災難的態度。\n3. 情感連結：結合個人對台灣社會韌性的觀察。" },
@@ -368,69 +368,122 @@
         const subjects = ['國文', '國綜'];
         
         subjects.forEach(subj => {
-            // ... (省略 是非、單選、複選、古文 的生成邏輯，保持與前版相同) ...
-            // 1. 是非題
+            // 1. 是非題 (目標: 150題)
             let tfQuestions = [];
-            IDIOM_DB.forEach(item => {
-                tfQuestions.push({ q: `關於「${item.idm}」的用法：「${item.r}」。請問此用法是否正確？`, a: "A", e: `解析：${item.idm}意指「${item.m}」，用法正確。`, type: "bool" });
-            });
-            IDIOM_DB.forEach(item => {
-                tfQuestions.push({ q: `關於「${item.idm}」的用法：「${item.w}」。請問此用法是否正確？`, a: "B", e: `解析：${item.idm}意指「${item.m}」，題目例句用法錯誤。`, type: "bool" });
-            });
+            // 產生 3 輪成語循環 (25*2*3 = 150)
+            for(let loop=0; loop<3; loop++) {
+                IDIOM_DB.forEach(item => {
+                    tfQuestions.push({ q: `關於「${item.idm}」的用法：「${item.r}」。請問此用法是否正確？`, a: "A", e: `解析：${item.idm}意指「${item.m}」，用法正確。`, type: "bool" });
+                    tfQuestions.push({ q: `關於「${item.idm}」的用法：「${item.w}」。請問此用法是否正確？`, a: "B", e: `解析：${item.idm}意指「${item.m}」，題目例句用法錯誤。`, type: "bool" });
+                });
+            }
             shuffleArray(tfQuestions);
-            tfQuestions.slice(0, 100).forEach((item, idx) => {
+            tfQuestions.slice(0, QUESTION_LIMIT).forEach((item, idx) => {
                 QUESTION_DB.push({ id: `${subj}_是非題_${idx+1}`, subject: subj, category: "是非題", type: "bool", text: `[${subj}是非 ${idx+1}] ${item.q}`, options: ["正確", "錯誤"], answer: item.a, explanation: item.e });
             });
 
-            // 2. 單選題
+            // 2. 單選題 (目標: 150題)
             let mcQuestions = [];
-            AUTHOR_DB.forEach(a => {
-                const others = AUTHOR_DB.filter(x => x.d !== a.d).map(x => x.d); const opts = shuffleArray([a.d, ...[...new Set(others)].slice(0, 3)]);
-                mcQuestions.push({ q: `關於文學常識，請問**${a.n}**主要活躍於哪一個朝代？`, o: opts, a: String.fromCharCode(65 + opts.indexOf(a.d)), e: `解析：${a.n}是${a.d}著名的文學家。` });
-            });
-            ANCIENT_SNIPPETS.forEach(s => {
-                const finalOpts = shuffleArray([s.ans, ...["描寫戰爭殘酷", "感嘆時光飛逝", "批評朝政腐敗", "歌頌大自然"].filter(x => x !== s.ans).slice(0,3)]);
-                mcQuestions.push({ q: `關於文句「${s.s}」，${s.q}`, o: finalOpts, a: String.fromCharCode(65 + finalOpts.indexOf(s.ans)), e: `解析：此句出自${s.a}《${s.t}》，${s.ans}。` });
-            });
-            while(mcQuestions.length < 100) { // 補題
-                 const randA = AUTHOR_DB[Math.floor(Math.random() * AUTHOR_DB.length)]; const opts = shuffleArray(["唐朝", "宋朝", "明朝", "清朝"]);
-                 mcQuestions.push({ q: `(複習) 請問**${randA.n}**是哪個朝代的人？`, o: opts, a: String.fromCharCode(65 + (opts.indexOf(randA.d)>-1?opts.indexOf(randA.d):0)), e: `解析：${randA.n}為${randA.d}人。` });
+            // 第一輪：作者與朝代/稱號
+            for(let loop=0; loop<2; loop++) {
+                AUTHOR_DB.forEach(a => {
+                    const others = AUTHOR_DB.filter(x => x.d !== a.d).map(x => x.d); 
+                    const opts = shuffleArray([a.d, ...[...new Set(others)].slice(0, 3)]);
+                    mcQuestions.push({ q: `關於文學常識，請問**${a.n}**主要活躍於哪一個朝代？`, o: opts, a: String.fromCharCode(65 + opts.indexOf(a.d)), e: `解析：${a.n}是${a.d}著名的文學家。` });
+                });
+                ANCIENT_SNIPPETS.forEach(s => {
+                    const finalOpts = shuffleArray([s.ans, ...["描寫戰爭殘酷", "感嘆時光飛逝", "批評朝政腐敗", "歌頌大自然"].filter(x => x !== s.ans).slice(0,3)]);
+                    mcQuestions.push({ q: `關於文句「${s.s}」，${s.q}`, o: finalOpts, a: String.fromCharCode(65 + finalOpts.indexOf(s.ans)), e: `解析：此句出自${s.a}《${s.t}》，${s.ans}。` });
+                });
+            }
+            // 補充隨機題型直到 150
+            while(mcQuestions.length < QUESTION_LIMIT) { 
+                 const randA = AUTHOR_DB[Math.floor(Math.random() * AUTHOR_DB.length)]; 
+                 const opts = shuffleArray(["唐朝", "宋朝", "明朝", "清朝"]);
+                 mcQuestions.push({ q: `(綜合測試) 請問**${randA.n}**是哪個朝代的人？`, o: opts, a: String.fromCharCode(65 + (opts.indexOf(randA.d)>-1?opts.indexOf(randA.d):0)), e: `解析：${randA.n}為${randA.d}人。` });
             }
             shuffleArray(mcQuestions);
-            mcQuestions.slice(0, 100).forEach((item, idx) => {
+            mcQuestions.slice(0, QUESTION_LIMIT).forEach((item, idx) => {
                 QUESTION_DB.push({ id: `${subj}_單選題_${idx+1}`, subject: subj, category: "單選題", type: "single", text: `[${subj}單選 ${idx+1}] ${item.q}`, options: item.o, answer: item.a, explanation: item.e });
             });
 
-            // 3. 複選題
-            for(let i=1; i<=100; i++) {
-                // 簡單生成邏輯示意，詳細邏輯參考前版
-                QUESTION_DB.push({ id: `${subj}_複選題_${i}`, subject: subj, category: "複選題", type: "multi", text: `[${subj}複選 ${i}] 關於李白，下列敘述何者正確？`, options: ["號詩仙(O)", "唐代人(O)", "字太白(O)", "曾任宰相(X)", "不擅飲酒(X)"], answer: ["A","B","C"], explanation: "解析：李白字太白，號詩仙，唐代人，喜飲酒，未任宰相。" });
+            // 3. 複選題 (目標: 150題)
+            for(let i=1; i<=QUESTION_LIMIT; i++) {
+                // 混合成語與文學常識，這裡使用動態生成確保多樣性
+                if (i % 2 === 0) {
+                    // 成語型
+                    let selectedIdioms = shuffleArray([...IDIOM_DB]).slice(0, 5);
+                    let options = [], answers = [], explanationArr = [];
+                    selectedIdioms.forEach((item, idx) => {
+                        let isCorrect = Math.random() > 0.5;
+                        let optKey = String.fromCharCode(65 + idx);
+                        options.push(`【${item.idm}】：${isCorrect ? item.r : item.w}`);
+                        if(isCorrect) { answers.push(optKey); explanationArr.push(`${optKey}: O (${item.m})`); }
+                        else { explanationArr.push(`${optKey}: X (${item.m})`); }
+                    });
+                    if (answers.length === 0) { options[0] = `【${selectedIdioms[0].idm}】：${selectedIdioms[0].r}`; answers.push('A'); explanationArr[0] = `A: O (${selectedIdioms[0].m})`; }
+                    answers.sort();
+                    QUESTION_DB.push({ id: `${subj}_複選題_${i}`, subject: subj, category: "複選題", type: "multi", text: `[${subj}複選 ${i}] 下列文句中成語的使用，哪些是**正確**的？`, options: options, answer: answers, explanation: "解析：\n" + explanationArr.join("\n") });
+                } else {
+                    // 文學常識型
+                    // 簡化邏輯：隨機抽取 5 個作者判斷朝代
+                    let facts = [];
+                    for(let j=0; j<5; j++) {
+                        let author = AUTHOR_DB[Math.floor(Math.random() * AUTHOR_DB.length)];
+                        let isTrue = Math.random() > 0.5;
+                        facts.push({ 
+                            s: `${author.n}是${isTrue ? author.d : (AUTHOR_DB.find(x=>x.d!==author.d)?.d||'現代')}人`, 
+                            valid: isTrue, 
+                            expl: isTrue ? 'O' : `X (${author.n}為${author.d})` 
+                        });
+                    }
+                    let options = facts.map(f => f.s);
+                    let answers = facts.map((f, idx) => f.valid ? String.fromCharCode(65+idx) : null).filter(x => x).sort();
+                    let expl = facts.map((f, idx) => `${String.fromCharCode(65+idx)}: ${f.expl}`).join("\n");
+                    if (answers.length === 0) { options[0] = `${AUTHOR_DB[0].n}是${AUTHOR_DB[0].d}人`; answers.push('A'); expl = expl.replace(/^A: .*/, "A: O"); }
+                    QUESTION_DB.push({ id: `${subj}_複選題_${i}`, subject: subj, category: "複選題", type: "multi", text: `[${subj}複選 ${i}] 下列關於作家朝代的敘述，哪些是**正確**的？`, options: options, answer: answers, explanation: expl });
+                }
             }
 
-            // 4. 古文閱讀 (短句)
-            ANCIENT_SNIPPETS.forEach((s, idx) => { // 擴充到100
-                 for(let k=0; k<4; k++) {
-                    QUESTION_DB.push({ id: `${subj}_古文_${idx*4+k+1}`, subject: subj, category: "古文", type: "single", text: `[${subj}古文 ${idx*4+k+1}] 閱讀：「${s.s}」。出自？`, options: shuffleArray([`${s.a}《${s.t}》`, "李白《將進酒》", "杜甫《春望》", "蘇軾《赤壁賦》"]), answer: "A", explanation: `出自${s.a}。` }); // 簡化邏輯
-                 }
-            });
+            // 4. 古文閱讀 (目標: 150題)
+            for(let i=0; i<QUESTION_LIMIT; i++) {
+                const s = ANCIENT_SNIPPETS[i % ANCIENT_SNIPPETS.length];
+                const type = i % 3; // 0:出處, 1:情感, 2:修辭
+                let qText = "", options = [], answer = "", explanation = "";
+                
+                if (type === 0) {
+                    qText = `閱讀下文：\n「${s.s}」\n\n這句話出自何人何書？`;
+                    const correct = `${s.a}《${s.t}》`;
+                    let wrongs = shuffleArray(ANCIENT_SNIPPETS).filter(x => x.a !== s.a).slice(0,3).map(x => `${x.a}《${x.t}》`);
+                    options = shuffleArray([correct, ...wrongs]);
+                    answer = String.fromCharCode(65 + options.indexOf(correct));
+                    explanation = `解析：此為${s.a}的名句。`;
+                } else {
+                    qText = `閱讀下文：\n「${s.s}」\n\n${s.q}`;
+                    const correct = s.ans;
+                    let wrongs = ["感嘆時光", "描寫戰爭", "抒發情愛", "歌頌自然", "諷刺時政"].filter(x => x !== s.ans).slice(0,3);
+                    options = shuffleArray([correct, ...wrongs]);
+                    answer = String.fromCharCode(65 + options.indexOf(correct));
+                    explanation = `解析：${s.s}，${correct}。`;
+                }
+                QUESTION_DB.push({ id: `${subj}_古文_${i+1}`, subject: subj, category: "古文", type: "single", text: `[${subj}古文 ${i+1}] ${qText}`, options: options, answer: answer, explanation: explanation });
+            }
             
-            // 5. [新增] 文章賞析 (20篇文章 * 5題 = 100題)
-            // 僅國文科目有此分類，但為保持結構統一，國綜也可加入
+            // 5. 文章賞析 (目標: 150題)
+            // 5篇文章 * 5題 = 25題/輪。需要 6 輪。
             if (subj === '國文') {
                 let readingId = 1;
-                // 我們有 5 個種子文章，重複循環 4 次以達到 20 篇文章
-                for(let cycle=0; cycle<4; cycle++) {
+                for(let cycle=0; cycle<6; cycle++) {
                     READING_PASSAGES.forEach((passage, pIdx) => {
-                        // 每篇文章有 5 個問題
                         passage.qs.forEach((qObj, qIdx) => {
                             QUESTION_DB.push({
                                 id: `${subj}_文章賞析_${readingId}`,
                                 subject: subj,
-                                category: "文章賞析", // 新分類
-                                type: "single", // 雖然是閱測，但本質是單選
-                                text: qObj.q, // 題目文字
-                                articleTitle: `【${passage.type}】${passage.title} (${cycle+1})`, // 傳遞文章標題
-                                articleContent: passage.content, // 傳遞文章內容
+                                category: "文章賞析",
+                                type: "single",
+                                text: qObj.q,
+                                articleTitle: `【${passage.type}】${passage.title} (選文 ${cycle+1})`,
+                                articleContent: passage.content,
                                 options: qObj.o,
                                 answer: qObj.a,
                                 explanation: qObj.e
@@ -442,18 +495,31 @@
             }
         });
 
-        // 6. 國寫題目 (修復完成，現在讀取詳細物件)
+        // 6. 國寫題目 (目標: 70題 = 20歷屆 + 50模擬)
+        // Part A: 歷屆題目 (20)
         WRITING_TOPICS.forEach((item, idx) => {
             QUESTION_DB.push({ 
                 id: `WRITING_${idx+1}`, 
-                subject: '國寫', 
-                category: '歷屆試題', 
-                type: 'writing', 
-                text: `【國寫試題 ${idx+1}】\n題目：${item.t}\n\n說明：${item.hint}`, // 組合題目與提示
-                answer: item.a, // 這裡現在會正確顯示詳細的閱卷解析
-                explanation: "" 
+                subject: '國寫', category: '歷屆試題', type: 'writing', 
+                text: `【國寫試題 ${idx+1}】\n題目：${item.t}\n\n說明：${item.hint}`, 
+                answer: item.a, explanation: "" 
             });
         });
+        
+        // Part B: 模擬生成題目 (50)
+        const simThemes = ["自我成長", "人際關係", "社會現象", "科技反思", "生命價值"];
+        const simTypes = ["論說文", "記敘文", "抒情文"];
+        for(let i=1; i<=50; i++) {
+            const theme = simThemes[i % simThemes.length];
+            const type = simTypes[i % simTypes.length];
+            QUESTION_DB.push({
+                id: `WRITING_SIM_${i}`,
+                subject: '國寫', category: '歷屆試題', type: 'writing',
+                text: `【國寫模擬題 ${i}】\n題目：關於${theme}的一次${type}練習\n\n說明：請針對「${theme}」主題，結合自身經驗，撰寫一篇${type}。`,
+                answer: `【模擬閱卷解析】\n此題為${theme}主題的寫作練習。\n1. ${type}重點：${type==='論說文'?'論點需清晰，論據需有力':'情感需真摯，描寫需細膩'}。\n2. 建議從生活中的小事切入，避免空泛議論。\n3. 結尾宜昇華至對人生的普遍思考。`,
+                explanation: ""
+            });
+        }
     }
 
     generateUniqueDatabase();
@@ -467,7 +533,7 @@
 
     // --- 渲染函數 ---
     function renderHome() {
-        state.view = 'home'; state.currentSubject = null; headerTitle.innerText = "108課綱學測國文全攻略";
+        state.view = 'home'; state.currentSubject = null; headerTitle.innerText = "108課綱學測國文全攻略 (增量版)";
         backBtn.classList.add('hidden'); footer.classList.add('hidden');
         app.innerHTML = `
             <div class="grid-container">
@@ -482,7 +548,7 @@
         if (subject === '國寫') { startQuiz('國寫', '歷屆試題'); return; }
 
         let categories = ['是非題', '單選題', '複選題', '古文'];
-        if (subject === '國文') categories.push('文章賞析'); // 僅國文加入此分類
+        if (subject === '國文') categories.push('文章賞析'); 
 
         let html = `<div class="grid-container grid-2-col">`;
         categories.forEach(cat => {
@@ -506,7 +572,6 @@
             return; 
         }
         state.quizList = available;
-        // 文章賞析不打亂順序，因為題目是 5 題一組的
         if (subject !== '國寫' && category !== '文章賞析') shuffleArray(state.quizList);
         renderQuestion();
     }
@@ -528,14 +593,12 @@
         let html = `<div class="question-container">
             <div class="q-meta"><span class="q-badge">${q.subject} • ${q.category}</span><span class="q-counter">ID: ${q.id.split('_').pop()}</span></div>`;
         
-        // --- 特殊渲染：文章賞析區塊 ---
         if (q.category === '文章賞析') {
             html += `<div class="article-box">
                 <div class="article-title">${q.articleTitle}</div>
                 <div class="article-content">${q.articleContent}</div>
             </div>`;
         }
-        // ---------------------------
 
         html += `<div class="q-text">${q.text}</div>`;
 
@@ -551,7 +614,6 @@
         app.innerHTML = html; app.scrollTop = 0;
     }
 
-    // ... (交互邏輯保持不變: selectOption, updateCharCount, submitAnswer, nextQuestion, modal...)
     window.selectOption = function(el, key, type) {
         if (document.getElementById('resultPanel').style.display === 'block') return;
         if (type === 'multi') {
