@@ -2,681 +2,719 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>108課綱學測國文全攻略 (增量版)</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>108課綱學測國文模擬App - 綜合測驗</title>
+    <!-- 引入 React 和 ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- 引入 Babel 用於解析 JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- 引入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        :root {
-            --primary: #8b5cf6;
-            --primary-dark: #6d28d9;
-            --secondary: #ec4899;
-            --success: #10b981;
-            --error: #ef4444;
-            --bg: #f3f4f6;
-            --card-bg: #ffffff;
-            --text-main: #1f2937;
-            --text-sub: #6b7280;
-        }
-
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Heiti TC", "Microsoft JhengHei", sans-serif; 
-            margin: 0; padding: 0; background-color: var(--bg); color: var(--text-main); 
-            height: 100vh; display: flex; flex-direction: column; overflow: hidden;
-            padding-top: env(safe-area-inset-top);
-        }
-
-        header { 
-            background-color: var(--card-bg);
-            padding: 0 1rem; display: flex; align-items: center; justify-content: space-between; 
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05); z-index: 100; height: 60px; flex-shrink: 0;
-        }
-
-        .header-btn { background: none; border: none; color: var(--primary); padding: 10px; font-size: 1.2rem; cursor: pointer; transition: 0.2s; }
-        .header-btn:active { opacity: 0.5; }
-        .header-title { font-size: 1.2rem; font-weight: 700; flex-grow: 1; text-align: center; color: var(--primary-dark); }
-
-        main { flex: 1; overflow-y: auto; padding: 1rem; padding-bottom: calc(100px + env(safe-area-inset-bottom)); }
-
-        .grid-container { display: grid; grid-template-columns: 1fr; gap: 16px; max-width: 600px; margin: 0 auto; }
-        .grid-2-col { grid-template-columns: 1fr 1fr; }
-
-        .card-btn { 
-            background: var(--card-bg); border-radius: 20px; padding: 1.5rem; 
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); border: 1px solid white;
-            position: relative; overflow: hidden; transition: transform 0.1s;
-        }
-        .card-btn:active { transform: scale(0.98); background: #f9fafb; }
-        
-        .card-icon-wrapper {
-            width: 50px; height: 50px; border-radius: 50%; background: #f3f4f6;
-            display: flex; align-items: center; justify-content: center; margin-bottom: 12px;
-        }
-        .card-btn i { font-size: 1.5rem; color: var(--primary); }
-        .card-btn h3 { margin: 0; font-size: 1.1rem; font-weight: 700; color: var(--text-main); }
-        .card-btn p { margin: 4px 0 0; font-size: 0.8rem; color: var(--text-sub); }
-
-        .progress-bar {
-            position: absolute; bottom: 0; left: 0; height: 4px; 
-            background: linear-gradient(90deg, var(--primary), var(--secondary)); 
-            border-radius: 0 0 20px 20px; transition: width 0.3s ease;
-        }
-
-        .question-container { animation: fadeIn 0.3s ease-out; max-width: 700px; margin: 0 auto; }
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&display=swap');
+        body { font-family: 'Noto Sans TC', sans-serif; }
+        .font-serif { font-family: 'Noto Serif TC', serif; }
+        .animate-fade-in { animation: fadeIn 0.5s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        .q-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
-        .q-badge { 
-            background: #eef2ff; color: var(--primary); padding: 4px 12px; 
-            border-radius: 99px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.5px;
-        }
-        .q-counter { font-size: 0.85rem; color: var(--text-sub); font-family: monospace; }
-        
-        /* 文章賞析專用樣式 */
-        .article-box {
-            background: #fff;
-            padding: 1.25rem;
-            border-radius: 12px;
-            border-left: 4px solid var(--primary);
-            margin-bottom: 1.5rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
-        }
-        .article-title {
-            font-weight: 800;
-            font-size: 1.1rem;
-            margin-bottom: 0.75rem;
-            color: var(--primary-dark);
-            border-bottom: 1px dashed #e5e7eb;
-            padding-bottom: 0.5rem;
-        }
-        .article-content {
-            font-size: 1.05rem;
-            line-height: 1.8;
-            color: #374151;
-            white-space: pre-wrap;
-            text-align: justify;
-        }
-        
-        .q-text { 
-            font-size: 1.15rem; line-height: 1.6; margin-bottom: 1rem; 
-            font-weight: 700; color: #111827;
-        }
-
-        .options-group { display: flex; flex-direction: column; gap: 12px; }
-        .option-item { 
-            padding: 16px 20px; border: 2px solid #e5e7eb; border-radius: 16px; background: white; 
-            font-size: 1rem; font-weight: 500; transition: all 0.2s; cursor: pointer; display: flex; gap: 12px;
-        }
-        .option-key { font-weight: 800; min-width: 24px; }
-        
-        .option-item.selected { border-color: var(--primary); background-color: #f5f3ff; color: var(--primary); }
-        .option-item.correct-mark { border-color: var(--success); background-color: #ecfdf5; color: #065f46; }
-        .option-item.wrong-mark { border-color: var(--error); background-color: #fef2f2; color: #991b1b; }
-
-        .writing-wrapper { position: relative; }
-        .writing-area { 
-            width: 100%; min-height: 300px; padding: 20px; border: 2px solid #e5e7eb; 
-            border-radius: 16px; font-size: 1.05rem; font-family: inherit; line-height: 1.8; 
-            background: #fff; resize: none; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
-        }
-        .writing-area:focus { border-color: var(--primary); }
-        .char-count { position: absolute; bottom: 15px; right: 15px; font-size: 0.8rem; color: #9ca3af; background: rgba(255,255,255,0.8); padding: 2px 6px; border-radius: 4px; }
-
-        .footer-actions { 
-            position: fixed; bottom: 0; left: 0; width: 100%; padding: 1rem; 
-            padding-bottom: calc(1rem + env(safe-area-inset-bottom));
-            background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); 
-            -webkit-backdrop-filter: blur(12px); border-top: 1px solid #f3f4f6;
-            display: flex; gap: 12px; z-index: 200; 
-        }
-
-        .btn { flex: 1; padding: 16px; border: none; border-radius: 14px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: 0.2s; }
-        .btn-primary { background: var(--primary); color: white; box-shadow: 0 4px 10px rgba(139, 92, 246, 0.3); }
-        .btn-primary:active { transform: translateY(1px); box-shadow: none; }
-        .btn-secondary { background: #e5e7eb; color: #4b5563; }
-
-        .result-panel { margin-top: 2rem; padding: 1.5rem; border-radius: 18px; display: none; border-left: 6px solid; animation: slideUp 0.3s; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .result-panel.correct { background: #ecfdf5; border-color: var(--success); color: #064e3b; }
-        .result-panel.wrong { background: #fef2f2; border-color: var(--error); color: #7f1d1d; }
-        .result-panel.analysis { background: #eff6ff; border-color: #3b82f6; color: #1e3a8a; }
-
-        .res-header { font-weight: 800; font-size: 1.1rem; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
-        .res-body { font-size: 0.95rem; line-height: 1.6; opacity: 0.9; }
-
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000;
-        }
-        .modal-card { background: white; padding: 2rem; border-radius: 24px; width: 85%; max-width: 340px; text-align: center; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
-        
-        .hidden { display: none !important; }
     </style>
 </head>
-<body>
+<body class="bg-gray-100 h-screen w-full flex justify-center items-center overflow-hidden">
+    <div id="root" class="w-full max-w-2xl h-full bg-white shadow-2xl relative"></div>
 
-<header>
-    <div style="width: 40px;">
-        <button id="backBtn" class="header-btn hidden" onclick="handleBack()">
-            <i class="fas fa-chevron-left"></i>
-        </button>
-    </div>
-    <div id="headerTitle" class="header-title">學測國文全攻略</div>
-    <div style="width: 40px;"></div>
-</header>
+    <script type="text/babel">
+        const { useState, useEffect, useMemo, useRef } = React;
 
-<main id="appContent">
-    <!-- Content injected by JS -->
-</main>
+        // -----------------------------------------------------------------------------
+        // 0. 內建圖標元件 (移除 lucide-react 依賴)
+        // -----------------------------------------------------------------------------
+        const Icons = {
+            Clock: (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
+            BookOpen: (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
+            CheckCircle: (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>,
+            XCircle: (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>,
+            AlertCircle: (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>,
+            BarChart2: (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg>,
+            ChevronRight: (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="m9 18 6-6-6-6"/></svg>,
+            ChevronLeft: (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="m15 18-6-6 6-6"/></svg>,
+            RotateCcw: (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>,
+            Home: (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,
+            Award: (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>,
+            Grid: (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>,
+            Flag: (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" x2="4" y1="22" y2="15"/></svg>,
+            Search: (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="11" cy="11" r="8"/><line x1="21" x2="16.65" y1="21" y2="16.65"/></svg>,
+            Menu: (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>,
+            Zap: (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        };
 
-<div id="footerActions" class="footer-actions hidden"></div>
+        // 解構賦值讓程式碼可以直接使用元件名稱
+        const { Clock, BookOpen, CheckCircle, XCircle, AlertCircle, BarChart2, ChevronRight, ChevronLeft, RotateCcw, Home, Award, Grid, Flag, Search, Menu, Zap } = Icons;
 
-<div id="genericModal" class="modal-overlay hidden">
-    <div class="modal-card">
-        <i id="modalIcon" class="fas fa-exclamation-circle" style="font-size: 3rem; color: var(--primary); margin-bottom: 1rem;"></i>
-        <h3 id="modalTitle" style="margin: 0 0 0.5rem 0;">標題</h3>
-        <p id="modalMsg" style="color: var(--text-sub); margin-bottom: 1.5rem;">訊息</p>
-        <div style="display: flex; gap: 12px;">
-            <button id="modalCancelBtn" class="btn btn-secondary" onclick="closeModal()">取消</button>
-            <button id="modalConfirmBtn" class="btn btn-primary">確認</button>
-        </div>
-    </div>
-</div>
+        // -----------------------------------------------------------------------------
+        // 1. 真實題庫範例
+        // -----------------------------------------------------------------------------
+        const REAL_QUESTION_EXAMPLES = [
+            {
+                id: 'real_1',
+                type: 'single',
+                category: '字音字形',
+                text: '下列各組「」內的字，讀音完全相同的是：',
+                options: [
+                    '「裨」補闕漏 / 「俾」倪眾人 / 「婢」膝奴顏',
+                    '「載」歌載舞 / 千「載」難逢 / 怨聲「載」道',
+                    '「朔」氣傳金柝 / 撲「朔」迷離 / 橫「槊」賦詩',
+                    '「與」民同樂 / 「與」其如此 / 歲不我「與」'
+                ],
+                correctAnswer: [2],
+                explanation: 'A. ㄅㄧˋ / ㄅㄧˋ / ㄅㄧˋ (正確)； B. ㄗㄞˋ / ㄗㄞˇ / ㄗㄞˋ； C. ㄕㄨㄛˋ / ㄕㄨㄛˋ / ㄕㄨㄛˋ (正確)； D. ㄩˇ / ㄩˇ / ㄩˇ (選項C朔、槊皆讀ㄕㄨㄛˋ，最為精確)',
+                difficulty: '中'
+            },
+            {
+                id: 'real_2',
+                type: 'single',
+                category: '成語應用',
+                text: '下列文句「」內的成語，使用最恰當的是：',
+                options: [
+                    '這部電影情節緊湊，高潮迭起，真是「罄竹難書」。',
+                    '他對於這件事的始末說明得「繪聲繪影」，讓人彷彿身歷其境。',
+                    '面對強敵壓境，將軍決定「破釜沉舟」，與城共存亡。',
+                    '雖然他犯了錯，但只要能「食言而肥」，大家還是會原諒他的。'
+                ],
+                correctAnswer: [2],
+                explanation: 'A. 罄竹難書形容罪惡極多。 B. 繪聲繪影雖可形容生動，但亦有加油添醋之意，C之破釜沉舟形容決心更為精確恰當。 C. 破釜沉舟形容做事果決。 D. 食言而肥指不守信用。',
+                difficulty: '易'
+            },
+            {
+                id: 'real_3',
+                type: 'group',
+                category: '閱讀素養',
+                passageTitle: '關於「孤獨」的現代與古典對話',
+                passageContent: `(甲) 莊子說：「獨與天地精神往來，而不敖倪於萬物。」這是一種崇高的孤獨。在莊子看來，人只有在孤獨中，才能從社會關係的網羅裡解脫出來，恢復生命的本真，與天地萬物合而為一。
 
-<script>
-    const QUESTION_LIMIT = 150; // 將題目數量上限提升至 150
-
-    // --- 資料庫區塊 ---
-    // 1. 成語資料庫
-    const IDIOM_DB = [
-        { idm: "空穴來風", m: "比喻事出有因", r: "這件事絕非空穴來風，必有其依據。", w: "這些謠言純屬空穴來風，完全沒有根據。" },
-        { idm: "罄竹難書", m: "形容罪惡極多", r: "這名獨裁者的暴行真是罄竹難書。", w: "志工們的善行義舉真是罄竹難書。" },
-        { idm: "差強人意", m: "大體上還能讓人滿意", r: "這次考試雖然沒滿分，但表現還算差強人意。", w: "服務態度太差了，真是差強人意。" },
-        { idm: "美輪美奐", m: "形容建築物高大華美", r: "這棟新落成的大樓設計得美輪美奐。", w: "她今天打扮得美輪美奐，驚豔全場。" },
-        { idm: "七月流火", m: "指天氣轉涼", r: "時序進入七月流火，早晚已有涼意。", w: "正午時分七月流火，熱得讓人受不了。" },
-        { idm: "罪不容誅", m: "罪大惡極，殺之不足以抵其罪", r: "他犯下多起重案，真是罪不容誅。", w: "他只是偷了個麵包，罪不容誅太誇張了。" },
-        { idm: "首當其衝", m: "最先受到攻擊或災害", r: "花東地區首當其衝，颱風災情慘重。", w: "他不畏艱難，總是首當其衝去解決問題。" },
-        { idm: "不刊之論", m: "確鑿不移、不可磨滅的言論", r: "這篇論文見解獨到，堪稱不刊之論。", w: "這篇文章寫得太爛，簡直是不刊之論。" },
-        { idm: "明日黃花", m: "過時的事物", r: "這款手機已是明日黃花，沒人要買了。", w: "這朵明日黃花開得真美麗。" },
-        { idm: "瓜田李下", m: "易引人嫌疑的場合", r: "為了避嫌，他盡量避免瓜田李下的場合。", w: "鄉下的瓜田李下風光十分迷人。" },
-        { idm: "望其項背", m: "能看見別人的頸背，喻程度接近", r: "他的成就之高，讓我們難以望其項背。", w: "我努力奔跑，終於望其項背超過了他。" },
-        { idm: "文不加點", m: "形容才思敏捷", r: "他寫文章文不加點，一氣呵成。", w: "這篇文章錯字連篇，真是文不加點。" },
-        { idm: "韋編三絕", m: "讀書勤奮", r: "他韋編三絕，終於考上理想學校。", w: "這本書被翻到韋編三絕，太破爛了。" },
-        { idm: "膠漆之交", m: "情誼深厚", r: "他們兩人是膠漆之交，無話不談。", w: "牆壁刷得像膠漆之交一樣黏。" },
-        { idm: "舉案齊眉", m: "夫妻相敬如賓", r: "這對老夫妻舉案齊眉，令人羨慕。", w: "我們是舉案齊眉的好朋友。" },
-        { idm: "三隻手", m: "扒手", r: "搭公車要小心三隻手。", w: "他是個能幹的多面手，像有三隻手一樣。" },
-        { idm: "上下其手", m: "玩弄手段，暗中作弊", r: "招標過程有人上下其手，圖利廠商。", w: "這鋼琴家上下其手，彈奏出美妙樂章。" },
-        { idm: "不以為然", m: "不認為是對的", r: "我對他的偏激言論不以為然。", w: "雖然失敗了，他卻不以為然，繼續努力。" },
-        { idm: "不以為意", m: "不放在心上", r: "對於別人的嘲諷，他總是不以為意。", w: "這麼重要的約會，你竟然不以為意。" },
-        { idm: "徐娘半老", m: "年長而有風韻的婦女", r: "那位老闆娘徐娘半老，風韻猶存。", w: "這小女孩徐娘半老，十分可愛。" },
-        { idm: "汗牛充棟", m: "藏書極多", r: "國家圖書館的藏書汗牛充棟。", w: "這間屠宰場汗牛充棟，生意興隆。" },
-        { idm: "溢美之詞", m: "過分誇讚", r: "這些稱讚全是溢美之詞，我愧不敢當。", w: "他的文章充滿溢美之詞，十分優美。" },
-        { idm: "野人獻曝", m: "平凡人所貢獻的意見", r: "這只是我野人獻曝的一點淺見。", w: "那個野人獻曝露在陽光下，真不雅觀。" },
-        { idm: "甚囂塵上", m: "傳聞吵嚷得厲害", r: "關於裁員的傳聞甚囂塵上。", w: "這裡空氣不好，灰塵甚囂塵上。" },
-        { idm: "破釜沈舟", m: "做事果決", r: "這次比賽我們破釜沈舟，勢在必得。", w: "船破了要趕快修補，不可破釜沈舟。" }
-    ];
-
-    // 2. 文學家資料庫
-    const AUTHOR_DB = [
-        { n: "李白", d: "唐朝", t: "詩仙", w: "靜夜思" },
-        { n: "杜甫", d: "唐朝", t: "詩聖", w: "春望" },
-        { n: "王維", d: "唐朝", t: "詩佛", w: "山居秋暝" },
-        { n: "蘇軾", d: "宋朝", t: "東坡居士", w: "赤壁賦" },
-        { n: "歐陽脩", d: "宋朝", t: "醉翁", w: "醉翁亭記" },
-        { n: "韓愈", d: "唐朝", t: "唐宋八大家之首", w: "師說" },
-        { n: "柳宗元", d: "唐朝", t: "柳河東", w: "始得西山宴遊記" },
-        { n: "白居易", d: "唐朝", t: "香山居士", w: "琵琶行" },
-        { n: "陶淵明", d: "東晉", t: "靖節先生", w: "桃花源記" },
-        { n: "范仲淹", d: "宋朝", t: "天下第一流人物", w: "岳陽樓記" },
-        { n: "李清照", d: "宋朝", t: "易安居士", w: "聲聲慢" },
-        { n: "歸有光", d: "明朝", t: "震川先生", w: "項脊軒志" },
-        { n: "袁宏道", d: "明朝", t: "公安派代表", w: "晚遊六橋待月記" },
-        { n: "賴和", d: "現代", t: "台灣新文學之父", w: "一桿稱仔" },
-        { n: "鍾理和", d: "現代", t: "倒在血泊裡的筆耕者", w: "笠山農場" },
-        { n: "諸葛亮", d: "三國", t: "臥龍", w: "出師表" },
-        { n: "曹丕", d: "三國", t: "魏文帝", w: "典論論文" },
-        { n: "劉禹錫", d: "唐朝", t: "詩豪", w: "陋室銘" },
-        { n: "文天祥", d: "宋朝", t: "宋末三傑", w: "正氣歌" },
-        { n: "琦君", d: "現代", t: "懷舊散文大師", w: "髻" }
-    ];
-
-    // 3. 古文句子資料庫
-    const ANCIENT_SNIPPETS = [
-        { s: "國破山河在，城春草木深", a: "杜甫", t: "春望", q: "此句抒發了何種情感？", ans: "感嘆國都淪陷" },
-        { s: "師者，所以傳道、受業、解惑也", a: "韓愈", t: "師說", q: "這句話定義了老師的？", ans: "三大職責" },
-        { s: "醉翁之意不在酒", a: "歐陽脩", t: "醉翁亭記", q: "後人常用此句比喻？", ans: "別有用心" },
-        { s: "大江東去，浪淘盡，千古風流人物", a: "蘇軾", t: "念奴嬌", q: "此句風格屬於？", ans: "豪放派" },
-        { s: "苔痕上階綠，草色入簾青", a: "劉禹錫", t: "陋室銘", q: "描寫了環境的？", ans: "清幽寧靜" },
-        { s: "余幼時即嗜學，家貧，無從致書以觀", a: "宋濂", t: "送東陽馬生序", q: "反映了作者？", ans: "勤奮好學" },
-        { s: "無邊落木蕭蕭下，不盡長江滾滾來", a: "杜甫", t: "登高", q: "使用了何種修辭？", ans: "對偶" },
-        { s: "學而不思則罔，思而不學則殆", a: "孔子", t: "論語", q: "強調了學習需要？", ans: "學思並重" },
-        { s: "先天下之憂而憂，後天下之樂而樂", a: "范仲淹", t: "岳陽樓記", q: "表現了儒家的？", ans: "入世精神" },
-        { s: "登高而招，臂非加長也，而見者遠", a: "荀子", t: "勸學", q: "比喻學習要善於？", ans: "利用外物" },
-        { s: "不以物喜，不以己悲", a: "范仲淹", t: "岳陽樓記", q: "這是作者期許的？", ans: "豁達胸襟" },
-        { s: "野芳發而幽香，佳木秀而繁陰", a: "歐陽脩", t: "醉翁亭記", q: "描寫的是哪個季節？", ans: "春夏" },
-        { s: "人有悲歡離合，月有陰晴圓缺", a: "蘇軾", t: "水調歌頭", q: "表達了作者對人生的？", ans: "豁達態度" },
-        { s: "天生我材必有用，千金散盡還復來", a: "李白", t: "將進酒", q: "展現了作者的？", ans: "自信豪邁" },
-        { s: "鞠躬盡瘁，死而後已", a: "諸葛亮", t: "出師表", q: "表現了臣子的？", ans: "忠貞不二" },
-        { s: "同是天涯淪落人，相逢何必曾相識", a: "白居易", t: "琵琶行", q: "作者與琵琶女的共同點是？", ans: "遭受貶謫" },
-        { s: "採菊東籬下，悠然見南山", a: "陶淵明", t: "飲酒", q: "反映了作者嚮往？", ans: "田園隱居" },
-        { s: "逝者如斯夫，不舍晝夜", a: "孔子", t: "論語", q: "感嘆的是？", ans: "時光流逝" },
-        { s: "寄蜉蝣於天地，渺滄海之一粟", a: "蘇軾", t: "赤壁賦", q: "感嘆人生？", ans: "短暫渺小" },
-        { s: "文章合為時而著，歌詩合為事而作", a: "白居易", t: "與元九書", q: "這是什麼運動的主張？", ans: "新樂府運動" },
-        { s: "安得廣廈千萬間，大庇天下寒士俱歡顏", a: "杜甫", t: "茅屋為秋風所破歌", q: "表現了作者的？", ans: "仁民愛物" },
-        { s: "出師未捷身先死，長使英雄淚滿襟", a: "杜甫", t: "蜀相", q: "歌詠的人物是？", ans: "諸葛亮" },
-        { s: "行到水窮處，坐看雲起時", a: "王維", t: "終南別業", q: "展現了何種心境？", ans: "閒適自得" },
-        { s: "風蕭蕭兮易水寒，壯士一去兮不復還", a: "佚名", t: "戰國策", q: "描寫的場景是？", ans: "荊軻刺秦王" },
-        { s: "兩情若是久長時，又豈在朝朝暮暮", a: "秦觀", t: "鵲橋仙", q: "這句詞的主題是？", ans: "愛情" }
-    ];
-
-    // 4. 文章賞析題庫種子
-    const READING_PASSAGES = [
-        {
-            title: "應用文：圖書館閉館公告",
-            type: "應用文",
-            content: "本館將於11月15日至11月20日進行年度盤點與系統維護，期間將全面暫停圖書借閱與歸還服務。閉館期間，若讀者之還書期限適逢上述日期，系統將自動展延至11月21日，不計算逾期罰款。\n\n電子資源服務（E-Resources）不受此限，讀者仍可透過本館網站使用電子書與期刊資料庫。自修室亦照常開放，開放時間為每日上午8時至晚間10時，請同學多加利用。\n\n圖書館讀者服務組 敬啟",
-            qs: [
-                { q: "關於本公告的內容，下列敘述何者正確？", o: ["閉館期間自修室同時關閉", "閉館期間無法使用電子書", "還書期限若在閉館期間將被罰款", "閉館主要原因是盤點與維護"], a: "D", e: "解析：公告明確指出閉館原因是「年度盤點與系統維護」。" },
-                { q: "若小明的還書期限原本是11月18日，依據公告，他的期限會變更為？", o: ["11月15日", "11月18日", "11月20日", "11月21日"], a: "D", e: "解析：公告提及「適逢上述日期，系統將自動展延至11月21日」。" },
-                { q: "閉館期間，讀者可以進行下列哪項活動？", o: ["臨櫃借書", "歸還實體書", "進入書庫找書", "在自修室自習"], a: "D", e: "解析：公告說明「自修室亦照常開放」。" },
-                { q: "「電子資源服務不受此限」的意思是？", o: ["電子資源也停止服務", "電子資源只能在館內使用", "電子資源照常提供服務", "電子資源需要額外付費"], a: "C", e: "解析：不受此限即指不受閉館影響，仍可使用。" },
-                { q: "此公告的發布單位是？", o: ["教務處", "學務處", "總務處", "圖書館讀者服務組"], a: "D", e: "解析：文末署名為「圖書館讀者服務組」。" }
-            ]
-        },
-        {
-            title: "詩經：關雎",
-            type: "詩經",
-            content: "關關雎鳩，在河之洲。窈窕淑女，君子好逑。\n參差荇菜，左右流之。窈窕淑女，寤寐求之。\n求之不得，寤寐思服。悠哉悠哉，輾轉反側。\n參差荇菜，左右采之。窈窕淑女，琴瑟友之。\n參差荇菜，左右芼之。窈窕淑女，鐘鼓樂之。",
-            qs: [
-                { q: "「關關」一詞在詩中作何解？", o: ["形容水流聲", "形容鳥鳴聲", "形容關門聲", "形容車馬聲"], a: "B", e: "解析：關關為雎鳩鳥的叫聲，屬於狀聲詞。" },
-                { q: "「君子好逑」的「逑」字意思為？", o: ["追求", "配偶", "皮球", "請求"], a: "B", e: "解析：逑，音ㄑㄧㄡˊ，意指配偶。" },
-                { q: "本詩主要描寫的情感是？", o: ["朋友間的友情", "臣子對君王的忠心", "男子對女子的愛慕", "父母對子女的關愛"], a: "C", e: "解析：描寫君子追求淑女的過程與情感。" },
-                { q: "「輾轉反側」形容主角處於何種狀態？", o: ["興奮難耐", "相思成疾，難以入眠", "身體疼痛", "正在做運動"], a: "B", e: "解析：因思念淑女而翻來覆去睡不著覺。" },
-                { q: "詩中以「琴瑟友之」、「鐘鼓樂之」表達了？", o: ["追求成功後的歡愉與結合", "主角擅長各種樂器", "古代宴會的盛況", "祭祀祖先的儀式"], a: "A", e: "解析：後段想像追求成功後，以音樂取悅對方，象徵和諧美滿。" }
-            ]
-        },
-        {
-            title: "古文：論語選",
-            type: "古文",
-            content: "子曰：「學而時習之，不亦說乎？有朋自遠方來，不亦樂乎？人不知而不慍，不亦君子乎？」\n\n曾子曰：「吾日三省吾身：為人謀而不忠乎？與朋友交而不信乎？傳不習乎？」",
-            qs: [
-                { q: "「學而時習之，不亦說乎」中的「說」字通假為何字？", o: ["說話的說", "喜悅的悅", "遊說的說", "脫離的脫"], a: "B", e: "解析：說通悅，高興的意思。" },
-                { q: "「人不知而不慍」表現了君子的何種修養？", o: ["重視名聲", "善於表達", "不求人知，心胸豁達", "喜歡隱居"], a: "C", e: "解析：別人不知道我的才華也不生氣，展現君子風範。" },
-                { q: "曾子「三省吾身」的內容不包含下列何者？", o: ["替人辦事是否盡忠", "與朋友交往是否守信", "老師傳授的課業是否溫習", "今天的飲食是否健康"], a: "D", e: "解析：原文僅提及忠、信、習，未提及飲食。" },
-                { q: "這兩段文字共同強調的精神是？", o: ["反省與學習", "交友的重要", "快樂的來源", "治國的方法"], a: "A", e: "解析：首章談學習的樂趣與修養，次章談自我的反省與檢視，皆與個人修身向學有關。" },
-                { q: "「有朋自遠方來」之「朋」，古注多解釋為？", o: ["酒肉朋友", "志同道合之人", "遠房親戚", "鄰居"], a: "B", e: "解析：同門為朋，指志同道合的夥伴。" }
-            ]
-        },
-        {
-            title: "現代散文：秋日的況味",
-            type: "現代文學",
-            content: "秋天的美，在於它的清澈與深沉。不同於春日的喧鬧與夏日的躁動，秋天像是一位歷經滄桑的智者，沉默而包容。\n樹葉由綠轉黃，再由黃轉紅，最後歸於泥土，這過程並非凋零，而是一場華麗的謝幕。走在鋪滿落葉的小徑上，腳下傳來清脆的碎裂聲，那是季節更迭的跫音。\n涼風起時，我不禁拉緊了衣領，心中卻升起一股莫名的暖意。或許是因為知道，在這個收穫的季節裡，所有的付出終將結出果實。",
-            qs: [
-                { q: "作者將秋天比喻為？", o: ["活潑的孩子", "熱情的青年", "歷經滄桑的智者", "溫柔的母親"], a: "C", e: "解析：文中提到「秋天像是一位歷經滄桑的智者」。" },
-                { q: "文中提到樹葉變色的過程，作者認為這是？", o: ["生命的終結", "一場華麗的謝幕", "悲慘的命運", "無意義的循環"], a: "B", e: "解析：文中敘述「這過程並非凋零，而是一場華麗的謝幕」。" },
-                { q: "「季節更迭的跫音」是指？", o: ["鳥叫聲", "風聲", "踩在落葉上的聲音", "雷聲"], a: "C", e: "解析：前文提到「走在鋪滿落葉的小徑上，腳下傳來清脆的碎裂聲」。" },
-                { q: "作者對秋天的態度主要是？", o: ["厭惡與排斥", "恐懼與不安", "欣賞與感悟", "冷漠與無視"], a: "C", e: "解析：從「美」、「清澈與深沉」、「暖意」可看出作者的欣賞。" },
-                { q: "文末提到的「暖意」源自於？", o: ["天氣變熱", "穿了厚衣服", "對收穫與付出的體悟", "喝了熱茶"], a: "C", e: "解析：源於「在這個收穫的季節裡，所有的付出終將結出果實」。" }
-            ]
-        },
-        {
-            title: "古典小說：草船借箭（改寫）",
-            type: "古典小說",
-            content: "周瑜對孔明說：「今軍中缺箭，敢煩先生監造十萬枝。」孔明應允，並立下軍令狀，承諾三日辦妥。\n魯肅私下問孔明：「三日如何造得十萬箭？」孔明笑曰：「山人自有妙計，只需子敬借我二十隻船，每船三十人，船上皆用青布為幔，各束草人千餘個。」\n第三日四更，大霧漫天。孔明命船隻駛向曹軍水寨，擂鼓吶喊。曹操疑有伏兵，不敢出戰，只命弓箭手亂箭射之。箭如雨下，盡射於草人之上。待霧散，孔明下令回師，船上草人已滿載雕翎箭十萬餘枝。",
-            qs: [
-                { q: "周瑜委託孔明造箭的真正意圖可能是？", o: ["真的缺箭", "想藉機為難孔明", "考驗孔明的體力", "想學習造箭技術"], a: "B", e: "解析：故事背景中周瑜嫉妒孔明才智，欲藉此難題加害之。" },
-                { q: "孔明為何選擇在「第三日四更」行動？", o: ["隨意挑選", "算準當天有大霧", "那天是吉日", "曹軍那天休息"], a: "B", e: "解析：孔明通曉天文，預知大霧漫天，曹操不敢出兵。" },
-                { q: "「草船借箭」成功的關鍵因素不包括？", o: ["大霧掩護", "曹操多疑", "魯肅協助", "周瑜指揮"], a: "D", e: "解析：周瑜並未參與此計畫，甚至想看孔明失敗。" },
-                { q: "曹操為何「不敢出戰，只命弓箭手亂箭射之」？", o: ["箭太多用不完", "看不清敵軍虛實，怕有埋伏", "想練習射箭", "瞧不起敵軍"], a: "B", e: "解析：因「大霧漫天」，曹操生性多疑，恐有伏兵。" },
-                { q: "此故事主要展現了孔明的？", o: ["勇猛過人", "神機妙算", "誠實守信", "謙虛有禮"], a: "B", e: "解析：利用天時、地利、人和完成不可能的任務，展現極高智慧。" }
-            ]
-        }
-    ];
-
-    // 5. 國寫題目種子 (歷屆)
-    const WRITING_TOPICS = [
-        { t: "關於經驗的N種思考", hint: "請以個人經驗出發，論述經驗的正反面影響。", a: "【閱卷重點與佳作特質】\n1. 立意取材：能辯證「經驗」的雙面性。經驗既是智慧的累積，也可能成為創新的框架或偏見的來源。\n2. 結構組織：建議採「正、反、合」的論述結構，先肯定經驗價值，再反思其侷限。\n3. 遣詞造句：若能舉出具體例證（如老馬識途vs.守株待兔）佐證論點，將更具說服力。" },
-        { t: "歪腰郵筒", hint: "從新聞事件中觀察社會現象，並提出個人見解。", a: "【閱卷重點與佳作特質】\n1. 核心觀點：不應僅止於描述事件，應深入探討現象背後的社會心理。\n2. 深度反思：可連結至當代人面對災難的態度。\n3. 情感連結：結合個人對台灣社會韌性的觀察。" },
-        { t: "漂流木的獨白", hint: "試擬物為人，以第一人稱書寫漂流木的際遇。", a: "【閱卷重點與佳作特質】\n1. 角色建立：以「物」之眼觀看世界。\n2. 象徵意義：象徵人生的際遇、挫折與歸宿。\n3. 情感層次：心境轉折需細膩。" },
-        { t: "季節的感思", hint: "結合感官描寫與情感抒發，描寫你最深刻的季節。", a: "【閱卷重點與佳作特質】\n1. 感官描寫：視覺、聽覺、嗅覺等多重感官的摹寫。\n2. 情景交融：景語即情語。\n3. 獨特體悟：避免陳腔濫調。" },
-        { t: "如果是結果...", hint: "假設語氣的運用，探討因果關係與人生選擇。", a: "【閱卷重點與佳作特質】\n1. 邏輯思辨：探討「結果論」的價值觀。\n2. 假設與現實：反思現實的選擇。\n3. 生命哲理：強調過程中的努力。" },
-        { t: "靜夜情懷", hint: "描寫夜晚的寧靜如何引發內心的波瀾。", a: "【閱卷重點與佳作特質】\n1. 氛圍營造：以動襯靜。\n2. 內在對話：卸下面具後的真實獨白。\n3. 情感昇華：對生命本質的思考。" },
-        { t: "花開花落", hint: "藉由自然現象感嘆生命無常與循環。", a: "【閱卷重點與佳作特質】\n1. 觀察入微：描繪花開的燦爛與花落的淒美。\n2. 生命隱喻：花期短暫喻人生苦短。\n3. 珍惜當下：活出精彩的積極人生觀。" },
-        { t: "我心中的桃花源", hint: "描繪理想社會或心靈的避風港。", a: "【閱卷重點與佳作特質】\n1. 具體描繪：需有具體的生活樣貌。\n2. 對比現實：隱含對現今社會問題的反思。\n3. 實踐可能：立意將更高遠。" },
-        { t: "科技與人性", hint: "論述AI時代下，人性的價值何在。", a: "【閱卷重點與佳作特質】\n1. 時代議題：科技帶來的便利與隱憂。\n2. 價值判斷：科技應服務於人性。\n3. 解決之道：保有溫暖人情與道德判斷。" },
-        { t: "論知足", hint: "探討知足常樂與進取心之間的平衡。", a: "【閱卷重點與佳作特質】\n1. 定義釐清：知足是對物質慾望的節制。\n2. 辯證思考：平衡「知足常樂」與「不進則退」。\n3. 層次論述：提出「知足而不自滿」的中道智慧。" },
-        { t: "逆境中的力量", hint: "舉例說明困境如何成為成長的養分。", a: "【閱卷重點與佳作特質】\n1. 敘事具體：具體描寫逆境的壓迫感。\n2. 轉折關鍵：面對逆境時的心態轉變。\n3. 成長體悟：逆境對於塑造人格的價值。" },
-        { t: "等待", hint: "描述一段等待的過程及其中心境的轉折。", a: "【閱卷重點與佳作特質】\n1. 心理描寫：刻畫等待時的焦慮或期待。\n2. 意義賦予：等待是一種沉澱。\n3. 結局安排：過程中獲得的領悟。" },
-        { t: "一場誤會", hint: "敘事練習，描寫衝突發生到化解的過程。", a: "【閱卷重點與佳作特質】\n1. 情節鋪陳：衝突的張力需足夠。\n2. 視角轉換：呈現雙方立場的差異。\n3. 情感修復：著重於化解誤會後的釋然。" },
-        { t: "窗外", hint: "藉由窗景投射內心情感或對未來的展望。", a: "【閱卷重點與佳作特質】\n1. 虛實相生：以景寫情。\n2. 象徵意涵：窗外代表未知、希望或自由。\n3. 連結自我：需有深刻的自我投射。" },
-        { t: "修補", hint: "不僅是物品的修復，更指涉人際關係的修補。", a: "【閱卷重點與佳作特質】\n1. 雙關意涵：過渡到情感、關係的修補。\n2. 過程描寫：修補需要耐心與珍惜。\n3. 價值反思：重申惜物與念舊精神。" },
-        { t: "重量", hint: "抽象概念具象化，探討責任、情感的重量。", a: "【閱卷重點與佳作特質】\n1. 轉化修辭：將無形轉化為有形。\n2. 舉重若輕：探討面對生命之重的承擔。\n3. 對比思考：有時「輕」也是一種重。" },
-        { t: "距離", hint: "探討物理距離與心理距離的辯證關係。", a: "【閱卷重點與佳作特質】\n1. 多元定義：物理、心理、美感距離。\n2. 現代反思：科技拉大了人心的隔閡。\n3. 理想距離：如何保持尊重與美感。" },
-        { t: "獨處的時刻", hint: "論述獨處對於自我反思的重要性。", a: "【閱卷重點與佳作特質】\n1. 釐清概念：區分孤獨與獨處。\n2. 內在活動：從中獲得的平靜。\n3. 自我整合：為了更完整地回到群體。" },
-        { t: "選擇", hint: "人生即是一連串選擇的總和，談你的關鍵選擇。", a: "【閱卷重點與佳作特質】\n1. 兩難情境：發生在價值衝突時。\n2. 決策過程：內心的掙扎與評估。\n3. 承擔後果：為自己的選擇負責。" },
-        { t: "溫暖", hint: "描寫一個讓你感到溫暖的瞬間或人物。", a: "【閱卷重點與佳作特質】\n1. 細節捕捉：微小的動作或言語。\n2. 氛圍烘托：反襯人情的溫暖。\n3. 傳遞擴散：擴大善的循環。" }
-    ];
-
-    const QUESTION_DB = [];
-    const USER_PROGRESS = new Set(); 
-
-    // --- 核心：動態題目生成器 ---
-    function generateUniqueDatabase() {
-        const subjects = ['國文', '國綜'];
-        
-        subjects.forEach(subj => {
-            // 1. 是非題 (目標: 150題)
-            let tfQuestions = [];
-            // 產生 3 輪成語循環 (25*2*3 = 150)
-            for(let loop=0; loop<3; loop++) {
-                IDIOM_DB.forEach(item => {
-                    tfQuestions.push({ q: `關於「${item.idm}」的用法：「${item.r}」。請問此用法是否正確？`, a: "A", e: `解析：${item.idm}意指「${item.m}」，用法正確。`, type: "bool" });
-                    tfQuestions.push({ q: `關於「${item.idm}」的用法：「${item.w}」。請問此用法是否正確？`, a: "B", e: `解析：${item.idm}意指「${item.m}」，題目例句用法錯誤。`, type: "bool" });
-                });
-            }
-            shuffleArray(tfQuestions);
-            tfQuestions.slice(0, QUESTION_LIMIT).forEach((item, idx) => {
-                QUESTION_DB.push({ id: `${subj}_是非題_${idx+1}`, subject: subj, category: "是非題", type: "bool", text: `[${subj}是非 ${idx+1}] ${item.q}`, options: ["正確", "錯誤"], answer: item.a, explanation: item.e });
-            });
-
-            // 2. 單選題 (目標: 150題)
-            let mcQuestions = [];
-            // 第一輪：作者與朝代/稱號
-            for(let loop=0; loop<2; loop++) {
-                AUTHOR_DB.forEach(a => {
-                    const others = AUTHOR_DB.filter(x => x.d !== a.d).map(x => x.d); 
-                    const opts = shuffleArray([a.d, ...[...new Set(others)].slice(0, 3)]);
-                    mcQuestions.push({ q: `關於文學常識，請問**${a.n}**主要活躍於哪一個朝代？`, o: opts, a: String.fromCharCode(65 + opts.indexOf(a.d)), e: `解析：${a.n}是${a.d}著名的文學家。` });
-                });
-                ANCIENT_SNIPPETS.forEach(s => {
-                    const finalOpts = shuffleArray([s.ans, ...["描寫戰爭殘酷", "感嘆時光飛逝", "批評朝政腐敗", "歌頌大自然"].filter(x => x !== s.ans).slice(0,3)]);
-                    mcQuestions.push({ q: `關於文句「${s.s}」，${s.q}`, o: finalOpts, a: String.fromCharCode(65 + finalOpts.indexOf(s.ans)), e: `解析：此句出自${s.a}《${s.t}》，${s.ans}。` });
-                });
-            }
-            // 補充隨機題型直到 150
-            while(mcQuestions.length < QUESTION_LIMIT) { 
-                 const randA = AUTHOR_DB[Math.floor(Math.random() * AUTHOR_DB.length)]; 
-                 const opts = shuffleArray(["唐朝", "宋朝", "明朝", "清朝"]);
-                 mcQuestions.push({ q: `(綜合測試) 請問**${randA.n}**是哪個朝代的人？`, o: opts, a: String.fromCharCode(65 + (opts.indexOf(randA.d)>-1?opts.indexOf(randA.d):0)), e: `解析：${randA.n}為${randA.d}人。` });
-            }
-            shuffleArray(mcQuestions);
-            mcQuestions.slice(0, QUESTION_LIMIT).forEach((item, idx) => {
-                QUESTION_DB.push({ id: `${subj}_單選題_${idx+1}`, subject: subj, category: "單選題", type: "single", text: `[${subj}單選 ${idx+1}] ${item.q}`, options: item.o, answer: item.a, explanation: item.e });
-            });
-
-            // 3. 複選題 (目標: 150題)
-            for(let i=1; i<=QUESTION_LIMIT; i++) {
-                // 混合成語與文學常識，這裡使用動態生成確保多樣性
-                if (i % 2 === 0) {
-                    // 成語型
-                    let selectedIdioms = shuffleArray([...IDIOM_DB]).slice(0, 5);
-                    let options = [], answers = [], explanationArr = [];
-                    selectedIdioms.forEach((item, idx) => {
-                        let isCorrect = Math.random() > 0.5;
-                        let optKey = String.fromCharCode(65 + idx);
-                        options.push(`【${item.idm}】：${isCorrect ? item.r : item.w}`);
-                        if(isCorrect) { answers.push(optKey); explanationArr.push(`${optKey}: O (${item.m})`); }
-                        else { explanationArr.push(`${optKey}: X (${item.m})`); }
-                    });
-                    if (answers.length === 0) { options[0] = `【${selectedIdioms[0].idm}】：${selectedIdioms[0].r}`; answers.push('A'); explanationArr[0] = `A: O (${selectedIdioms[0].m})`; }
-                    answers.sort();
-                    QUESTION_DB.push({ id: `${subj}_複選題_${i}`, subject: subj, category: "複選題", type: "multi", text: `[${subj}複選 ${i}] 下列文句中成語的使用，哪些是**正確**的？`, options: options, answer: answers, explanation: "解析：\n" + explanationArr.join("\n") });
-                } else {
-                    // 文學常識型
-                    // 簡化邏輯：隨機抽取 5 個作者判斷朝代
-                    let facts = [];
-                    for(let j=0; j<5; j++) {
-                        let author = AUTHOR_DB[Math.floor(Math.random() * AUTHOR_DB.length)];
-                        let isTrue = Math.random() > 0.5;
-                        facts.push({ 
-                            s: `${author.n}是${isTrue ? author.d : (AUTHOR_DB.find(x=>x.d!==author.d)?.d||'現代')}人`, 
-                            valid: isTrue, 
-                            expl: isTrue ? 'O' : `X (${author.n}為${author.d})` 
-                        });
+(乙) 現代社會學家大衛·里斯曼在《寂寞的群眾》中指出，現代人往往是「他人導向」的，我們敏銳地捕捉他人的期待與評價。我們身處人群之中，卻感到前所未有的孤獨。這種孤獨源於與真實自我的疏離。`,
+                questions: [
+                    {
+                        id: 'real_3_1',
+                        type: 'single',
+                        text: '根據(甲)文，莊子所認為的「孤獨」具有何種特質？',
+                        options: [
+                            '是被人排擠後的無奈狀態',
+                            '是一種傲視萬物、唯我獨尊的態度',
+                            '是擺脫社會束縛，回歸生命本真的途徑',
+                            '是為了切斷與外界的所有聯繫'
+                        ],
+                        correctAnswer: [2],
+                        explanation: '文中提到「從社會關係的網羅裡解脫出來，恢復生命的本真」，故選C。'
+                    },
+                    {
+                        id: 'real_3_2',
+                        type: 'single',
+                        text: '綜合(甲)、(乙)二文，下列敘述何者最為適當？',
+                        options: [
+                            '莊子與里斯曼都認為孤獨是負面的心理狀態',
+                            '莊子的孤獨是精神的充實，現代人的孤獨常是自我的迷失',
+                            '現代科技可以解決莊子所說的孤獨問題',
+                            '里斯曼認為「他人導向」有助於消除孤獨感'
+                        ],
+                        correctAnswer: [1],
+                        explanation: '莊子的孤獨是「與天地精神往來」(充實)；里斯曼指出現代人「身處人群卻感到孤獨」，源於「與真實自我的疏離」(迷失)。'
                     }
-                    let options = facts.map(f => f.s);
-                    let answers = facts.map((f, idx) => f.valid ? String.fromCharCode(65+idx) : null).filter(x => x).sort();
-                    let expl = facts.map((f, idx) => `${String.fromCharCode(65+idx)}: ${f.expl}`).join("\n");
-                    if (answers.length === 0) { options[0] = `${AUTHOR_DB[0].n}是${AUTHOR_DB[0].d}人`; answers.push('A'); expl = expl.replace(/^A: .*/, "A: O"); }
-                    QUESTION_DB.push({ id: `${subj}_複選題_${i}`, subject: subj, category: "複選題", type: "multi", text: `[${subj}複選 ${i}] 下列關於作家朝代的敘述，哪些是**正確**的？`, options: options, answer: answers, explanation: expl });
-                }
+                ]
+            },
+            {
+                id: 'real_4',
+                type: 'multi',
+                category: '古文十五篇',
+                text: '關於《赤壁賦》與《始得西山宴遊記》的比較，下列敘述哪些正確？',
+                options: [
+                    '二文皆為貶謫時期的作品',
+                    '蘇軾在《赤壁賦》中以「水、月」為喻，闡述變與不變的哲理',
+                    '柳宗元在《始得西山宴遊記》中，透過與萬物冥合，化解了心中的憂懼',
+                    '二文最終都流露出對現實政治的強烈批判與不滿，無法釋懷',
+                    '二文皆大量運用駢偶句式，語言華麗堆砌'
+                ],
+                correctAnswer: [0, 1, 2],
+                explanation: 'A. 正確，蘇貶黃州，柳貶永州。 B. 正確。 C. 正確，心凝形釋。 D. 錯誤，二文皆達到精神超脫。 E. 錯誤，柳文風格峭拔。',
+                difficulty: '難'
+            },
+            {
+                id: 'real_5',
+                type: 'group',
+                category: '科普閱讀',
+                passageTitle: '人工智慧與神經網絡',
+                passageContent: `深度學習（Deep Learning）是機器學習的一個分支... (此處省略部分內文以節省空間)... 然而，深度學習模型通常被稱為「黑盒子」（Black Box），因為即使是設計者，也往往難以解釋神經網絡內部具體是如何做出某個決策的。`,
+                questions: [
+                    {
+                        id: 'real_5_1',
+                        type: 'single',
+                        text: '根據本文，深度學習與傳統演算法的主要差異為何？',
+                        options: [
+                            '深度學習完全不需要任何數據',
+                            '傳統演算法模仿人類大腦，深度學習則否',
+                            '深度學習能自動從數據中學習特徵',
+                            '傳統演算法是黑盒子'
+                        ],
+                        correctAnswer: [2],
+                        explanation: '自動從海量數據中學習特徵。'
+                    },
+                    {
+                        id: 'real_5_2',
+                        type: 'multi',
+                        text: '關於「黑盒子」問題，下列推論哪些合理？',
+                        options: [
+                            '可能包含人類未知的偏見',
+                            '運作邏輯不夠透明',
+                            '增加數據量能解決解釋性問題',
+                            '在醫療法律領域應用會產生疑慮'
+                        ],
+                        correctAnswer: [0, 1, 3],
+                        explanation: '增加數據量無法解決黑盒子(可解釋性)問題。'
+                    }
+                ]
+            }
+        ];
+
+        // -----------------------------------------------------------------------------
+        // 2. 擴充版仿真題庫資料庫
+        // -----------------------------------------------------------------------------
+        const IDIOMS = [
+            '剛愎自用', '緣木求魚', '按圖索驥', '不以為然', '首當其衝', '罄竹難書', '目不識丁', '妄自菲薄', '韋編三絕', '洛陽紙貴',
+            '汗牛充棟', '三令五申', '不脛而走', '分道揚鑣', '未雨綢繆', '每下愈況', '相形見絀', '約定俗成', '破釜沉舟', '剛毅木訥',
+            '振聾發聵', '甚囂塵上', '眾口鑠金', '莫衷一是', '虛與委蛇', '買櫝還珠', '滄海桑田', '琳瑯滿目', '錙銖必較', '趨之若鶩',
+            '濫竽充數', '櫛風沐雨', '睚眥必報', '矯揉造作', '躊躇滿志', '諱莫如深', '獨樹一幟', '鞭辟入裡', '不落窠臼', '因噎廢食'
+        ];
+
+        const AUTHORS = [
+            { name: '蘇軾', key: '豪放派、貶謫文學、赤壁賦' },
+            { name: '韓愈', key: '文以載道、古文運動、師說' },
+            { name: '柳宗元', key: '永州八記、寓言、山水遊記' },
+            { name: '歐陽脩', key: '醉翁亭記、六一居士、北宋文壇領袖' },
+            { name: '李白', key: '詩仙、浪漫主義、將進酒' },
+            { name: '杜甫', key: '詩聖、社會寫實、三吏三別' },
+            { name: '白居易', key: '新樂府運動、琵琶行、老嫗能解' },
+            { name: '歸有光', key: '項脊軒志、震川先生、明代散文' },
+            { name: '袁宏道', key: '性靈說、晚明小品、公安派' },
+            { name: '賴和', key: '台灣新文學之父、一桿稱仔' },
+            { name: '陶淵明', key: '隱逸詩人、桃花源記、不為五斗米折腰' },
+            { name: '屈原', key: '楚辭、離騷、愛國詩人' },
+            { name: '范仲淹', key: '岳陽樓記、先天下之憂而憂' },
+            { name: '李清照', key: '婉約派詞人、聲聲慢、金石錄' },
+            { name: '辛棄疾', key: '豪放詞、愛國詞人、稼軒長短句' }
+        ];
+
+        const CLASSICS = [
+            '《紅樓夢》', '《水滸傳》', '《三國演義》', '《西遊記》', '《世說新語》', '《老殘遊記》', '《聊齋誌異》', 
+            '《儒林外史》', '《詩經》', '《楚辭》', '《左傳》', '《史記》', '《漢書》', '《戰國策》', '《夢溪筆談》'
+        ];
+
+        const PHONETICS = [
+            { word: '「裨」益', ans: 'ㄅㄧˋ' }, { word: '「裨」將', ans: 'ㄆㄧˊ' },
+            { word: '「載」重', ans: 'ㄗㄞˋ' }, { word: '記「載」', ans: 'ㄗㄞˇ' },
+            { word: '「哄」堂大笑', ans: 'ㄏㄨㄥ' }, { word: '「哄」騙', ans: 'ㄏㄨㄥˇ' },
+            { word: '起「鬨」', ans: 'ㄏㄨㄥˋ' }, { word: '「強」迫', ans: 'ㄑㄧㄤˇ' },
+            { word: '倔「強」', ans: 'ㄐㄧㄤˋ' }, { word: '「創」傷', ans: 'ㄔㄨㄤ' },
+            { word: '「創」作', ans: 'ㄔㄨㄤˋ' }, { word: '粗「獷」', ans: 'ㄍㄨㄤˇ' }
+        ];
+
+        const TYPOS = [
+            { w: '再接再利', r: '再接再厲' }, { w: '名列前茅', r: '名列前茅' },
+            { w: '一股作氣', r: '一鼓作氣' }, { w: '迫不及待', r: '迫不及待' },
+            { w: '按步就班', r: '按部就班' }, { w: '川流不息', r: '川流不息' },
+            { w: '美輪美煥', r: '美輪美奐' }, { w: '固步自封', r: '故步自封' },
+            { w: '不徑而走', r: '不脛而走' }, { w: '幅員廣大', r: '幅員廣大' }
+        ];
+
+        // -----------------------------------------------------------------------------
+        // Helper: Fisher-Yates Shuffle
+        // -----------------------------------------------------------------------------
+        const fisherYatesShuffle = (array) => {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex !== 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        };
+
+        // -----------------------------------------------------------------------------
+        // Generator Logic
+        // -----------------------------------------------------------------------------
+        const generateRealisticText = (type, variantCount) => {
+            const rand = (arr) => arr[Math.floor(Math.random() * arr.length)];
+            const shuffle = (arr) => [...arr].sort(() => 0.5 - Math.random());
+            
+            // 標記複習題
+            const isReview = variantCount > 0;
+            const reviewLabel = isReview ? '【💡複習題】' : '';
+
+            if (type === 'idiom') {
+                const selectedIdioms = shuffle(IDIOMS).slice(0, 4);
+                const target = selectedIdioms[0]; 
+                return {
+                    category: '成語應用',
+                    text: `${reviewLabel} 下列文句「」內的成語，使用最恰當的是：`,
+                    options: [
+                        `他做事總是「${target}」，因此深獲上司賞識。(假設此為正確情境)`,
+                        `面對這樣的危機，我們只能「${selectedIdioms[1]}」，毫無辦法。`,
+                        `這家餐廳的菜色真是「${selectedIdioms[2]}」，讓人食指大動。`,
+                        `看到他那「${selectedIdioms[3]}」的樣子，真讓人感到好笑。`
+                    ],
+                    explanation: `本題測驗成語的正確使用情境。選項中成語「${target}」與語境最為貼切。`,
+                    correctIndex: 0,
+                    isReview
+                };
+            } else if (type === 'phonetic') {
+                const pairs = shuffle(PHONETICS).slice(0, 4);
+                return {
+                    category: '字音辨析',
+                    text: `${reviewLabel} 下列「」內的字音，標示正確的是：`,
+                    options: [
+                        `${pairs[0].word}：${pairs[0].ans}`,
+                        `${pairs[1].word}：${pairs[1].ans.replace('ˇ', 'ˋ').replace('ˋ', 'ˊ').replace('ˊ', 'ˇ')}`,
+                        `${pairs[2].word}：${pairs[2].ans.replace('ˇ', 'ˋ').replace('ˋ', 'ˊ').replace('ˊ', 'ˇ')}`,
+                        `${pairs[3].word}：${pairs[3].ans.replace('ˇ', 'ˋ').replace('ˋ', 'ˊ').replace('ˊ', 'ˇ')}`
+                    ],
+                    explanation: `本題測驗一字多音。正確選項為 A。${pairs[0].word}讀作${pairs[0].ans}。`,
+                    correctIndex: 0,
+                    isReview
+                };
+            } else if (type === 'typo') {
+                const words = shuffle(TYPOS).slice(0, 4);
+                return {
+                    category: '字形辨析',
+                    text: `${reviewLabel} 下列詞語中，完全沒有錯別字的是：`,
+                    options: [
+                        `${words[0].r}`,
+                        `${words[1].w}`,
+                        `${words[2].w}`,
+                        `${words[3].w}`
+                    ],
+                    explanation: `A選項「${words[0].r}」用字正確。其他選項應為：${words[1].r}、${words[2].r}、${words[3].r}。`,
+                    correctIndex: 0,
+                    isReview
+                };
+            } else if (type === 'literature') {
+                const author = rand(AUTHORS);
+                const otherAuthors = shuffle(AUTHORS.filter(a => a.name !== author.name)).slice(0, 3);
+                return {
+                    category: '國學常識',
+                    text: `${reviewLabel} 關於${author.name}的文學成就與生平，下列敘述何者正確？`,
+                    options: [
+                        `${author.name}，關鍵詞包含：${author.key}。`,
+                        `${author.name}與${otherAuthors[0].name}合稱，並稱為「${otherAuthors[0].name.slice(0,1)}...」。`,
+                        `${author.name}是${otherAuthors[1].name}的學生，風格深受影響。`,
+                        `${author.name}著有《${otherAuthors[2].name}集》，風格綺麗。`
+                    ],
+                    explanation: `本題測驗對${author.name}文學風格的理解。${author.name}以${author.key.split('、')[0]}著稱。`,
+                    correctIndex: 0,
+                    isReview
+                };
+            } else {
+                const book = rand(CLASSICS);
+                return {
+                    category: '古典小說',
+                    text: `${reviewLabel} 關於${book}的內容與寫作特色，下列敘述何者正確？`,
+                    options: [
+                        `是一部章回體小說，內容描寫社會百態。`,
+                        `以神魔題材為主，富含諷刺社會現實的意味。`,
+                        `書中人物性格鮮明，結構宏大嚴謹。`,
+                        `以第一人稱觀點敘述，開創小說新局。`
+                    ],
+                    explanation: `本題測驗對中國古典小說${book}的體裁與內容大意的掌握程度。`,
+                    correctIndex: 0,
+                    isReview
+                };
+            }
+        };
+
+        const generateMockQuestions = (startId, count) => {
+            const mocks = [];
+            const types = ['idiom', 'phonetic', 'typo', 'literature', 'classic'];
+            let taskPool = [];
+            
+            // 建立任務池，確保均勻分佈
+            const loopsNeeded = Math.ceil(count / types.length) + 2; 
+            for (let loop = 0; loop < loopsNeeded; loop++) {
+                types.forEach(type => {
+                    taskPool.push({ type, variantCount: loop });
+                });
             }
 
-            // 4. 古文閱讀 (目標: 150題)
-            for(let i=0; i<QUESTION_LIMIT; i++) {
-                const s = ANCIENT_SNIPPETS[i % ANCIENT_SNIPPETS.length];
-                const type = i % 3; // 0:出處, 1:情感, 2:修辭
-                let qText = "", options = [], answer = "", explanation = "";
+            // 使用 Fisher-Yates 洗牌
+            taskPool = fisherYatesShuffle(taskPool);
+            const selectedTasks = taskPool.slice(0, count);
+
+            selectedTasks.forEach((task, i) => {
+                const isMulti = Math.random() > 0.85; 
+                const content = generateRealisticText(task.type, task.variantCount);
                 
-                if (type === 0) {
-                    qText = `閱讀下文：\n「${s.s}」\n\n這句話出自何人何書？`;
-                    const correct = `${s.a}《${s.t}》`;
-                    let wrongs = shuffleArray(ANCIENT_SNIPPETS).filter(x => x.a !== s.a).slice(0,3).map(x => `${x.a}《${x.t}》`);
-                    options = shuffleArray([correct, ...wrongs]);
-                    answer = String.fromCharCode(65 + options.indexOf(correct));
-                    explanation = `解析：此為${s.a}的名句。`;
-                } else {
-                    qText = `閱讀下文：\n「${s.s}」\n\n${s.q}`;
-                    const correct = s.ans;
-                    let wrongs = ["感嘆時光", "描寫戰爭", "抒發情愛", "歌頌自然", "諷刺時政"].filter(x => x !== s.ans).slice(0,3);
-                    options = shuffleArray([correct, ...wrongs]);
-                    answer = String.fromCharCode(65 + options.indexOf(correct));
-                    explanation = `解析：${s.s}，${correct}。`;
+                let finalOptions = content.options.map((text, idx) => ({ 
+                    text, 
+                    isCorrect: idx === content.correctIndex 
+                }));
+                finalOptions = fisherYatesShuffle(finalOptions);
+                
+                let correctIndices = [];
+                finalOptions.forEach((opt, idx) => {
+                    if (opt.isCorrect) correctIndices.push(idx);
+                });
+
+                if (isMulti) {
+                    correctIndices = [0, 1]; 
+                    content.explanation += " (此題為模擬多選，正確答案包含 A 與 B)";
                 }
-                QUESTION_DB.push({ id: `${subj}_古文_${i+1}`, subject: subj, category: "古文", type: "single", text: `[${subj}古文 ${i+1}] ${qText}`, options: options, answer: answer, explanation: explanation });
-            }
-            
-            // 5. 文章賞析 (目標: 150題)
-            // 5篇文章 * 5題 = 25題/輪。需要 6 輪。
-            if (subj === '國文') {
-                let readingId = 1;
-                for(let cycle=0; cycle<6; cycle++) {
-                    READING_PASSAGES.forEach((passage, pIdx) => {
-                        passage.qs.forEach((qObj, qIdx) => {
-                            QUESTION_DB.push({
-                                id: `${subj}_文章賞析_${readingId}`,
-                                subject: subj,
-                                category: "文章賞析",
-                                type: "single",
-                                text: qObj.q,
-                                articleTitle: `【${passage.type}】${passage.title} (選文 ${cycle+1})`,
-                                articleContent: passage.content,
-                                options: qObj.o,
-                                answer: qObj.a,
-                                explanation: qObj.e
+
+                const answerLabels = correctIndices.map(idx => String.fromCharCode(65 + idx)).join('、');
+
+                mocks.push({
+                    id: `mock_${startId + i}`,
+                    type: isMulti ? 'multi' : 'single',
+                    category: content.category,
+                    text: `[模擬 #${startId + i}] ${content.text}`,
+                    options: finalOptions.map(o => o.text),
+                    correctAnswer: correctIndices,
+                    explanation: `【${content.category}解析】${content.explanation} (本題正確選項為 ${answerLabels})`,
+                    difficulty: ['易', '中', '難'][Math.floor(Math.random() * 3)],
+                    isReview: content.isReview
+                });
+            });
+            return mocks;
+        };
+
+        // -----------------------------------------------------------------------------
+        // 主程式
+        // -----------------------------------------------------------------------------
+        function ChineseExamApp() {
+            const [currentScreen, setCurrentScreen] = useState('home'); 
+            const [questions, setQuestions] = useState([]);
+            const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+            const [userAnswers, setUserAnswers] = useState({});
+            const [markedQuestions, setMarkedQuestions] = useState(new Set()); 
+            const [showExplanation, setShowExplanation] = useState(false);
+            const [showGrid, setShowGrid] = useState(false); 
+
+            useEffect(() => {
+                let flattened = [];
+                REAL_QUESTION_EXAMPLES.forEach(item => {
+                    if (item.type === 'group') {
+                        item.questions.forEach(q => {
+                            flattened.push({
+                                ...q,
+                                groupTitle: item.passageTitle,
+                                groupContent: item.passageContent,
+                                isGroup: true
                             });
-                            readingId++;
                         });
-                    });
+                    } else {
+                        flattened.push(item);
+                    }
+                });
+
+                const currentCount = flattened.length;
+                const needed = 500 - currentCount;
+                if (needed > 0) {
+                    const mocks = generateMockQuestions(currentCount + 1, needed);
+                    flattened = [...flattened, ...mocks];
                 }
+
+                setQuestions(flattened);
+            }, []);
+
+            const startExam = () => {
+                setCurrentQuestionIndex(0);
+                setUserAnswers({});
+                setMarkedQuestions(new Set());
+                setShowExplanation(false);
+                setShowGrid(false);
+                setCurrentScreen('quiz');
+            };
+
+            const handleAnswerSelect = (optionIndex, isMulti) => {
+                if (showExplanation) return; 
+
+                const currentQ = questions[currentQuestionIndex];
+                const qId = currentQ.id;
+                
+                setUserAnswers(prev => {
+                    const currentSelected = prev[qId] || [];
+                    if (isMulti) {
+                        if (currentSelected.includes(optionIndex)) {
+                            return { ...prev, [qId]: currentSelected.filter(i => i !== optionIndex) };
+                        } else {
+                            return { ...prev, [qId]: [...currentSelected, optionIndex].sort() };
+                        }
+                    } else {
+                        return { ...prev, [qId]: [optionIndex] };
+                    }
+                });
+
+                if (!isMulti) {
+                    setShowExplanation(true);
+                }
+            };
+
+            const toggleMarkQuestion = () => {
+                const qId = questions[currentQuestionIndex].id;
+                setMarkedQuestions(prev => {
+                    const newSet = new Set(prev);
+                    if (newSet.has(qId)) newSet.delete(qId);
+                    else newSet.add(qId);
+                    return newSet;
+                });
+            };
+
+            const calculateScore = () => {
+                let rawScore = 0;
+                questions.forEach(q => {
+                    const userAns = userAnswers[q.id] || [];
+                    const correctAns = q.correctAnswer;
+                    const isCorrect = userAns.length === correctAns.length && userAns.every(val => correctAns.includes(val));
+                    if (isCorrect) rawScore++;
+                });
+                const percentage = (rawScore / questions.length) * 100;
+                let rank = 0;
+                if (percentage >= 90) rank = 15;
+                else if (percentage >= 85) rank = 14;
+                else if (percentage >= 80) rank = 13;
+                else if (percentage >= 70) rank = 11;
+                else if (percentage >= 60) rank = 9;
+                else rank = Math.floor(percentage / 10) + 1;
+
+                return { rawScore, total: questions.length, rank, percentage };
+            };
+
+            // ---------------------------------------------------------------------------
+            // 元件
+            // ---------------------------------------------------------------------------
+
+            const QuestionGrid = ({ closeGrid }) => (
+                <div className="fixed inset-0 bg-black/50 z-50 flex justify-end animate-fade-in">
+                    <div className="w-full max-w-sm bg-white h-full shadow-2xl flex flex-col animate-slide-in-right">
+                        <div className="p-4 border-b flex justify-between items-center bg-gray-50">
+                            <h3 className="font-bold text-lg text-gray-800 flex items-center">
+                                <Icons.Grid size={20} className="mr-2"/> 題目導航
+                            </h3>
+                            <button onClick={closeGrid} className="p-2 hover:bg-gray-200 rounded-full">
+                                <Icons.XCircle size={24} className="text-gray-500"/>
+                            </button>
+                        </div>
+                        <div className="flex-1 overflow-y-auto p-4">
+                            <div className="grid grid-cols-5 gap-3">
+                                {questions.map((q, idx) => {
+                                    const isAnswered = userAnswers[q.id] && userAnswers[q.id].length > 0;
+                                    const isMarked = markedQuestions.has(q.id);
+                                    const isCurrent = currentQuestionIndex === idx;
+                                    let btnClass = "h-10 w-10 rounded-lg flex items-center justify-center text-sm font-medium transition relative ";
+                                    if (isCurrent) btnClass += "ring-2 ring-blue-500 ring-offset-2 bg-blue-100 text-blue-700 font-bold ";
+                                    else if (isAnswered) btnClass += "bg-blue-600 text-white shadow-sm ";
+                                    else btnClass += "bg-gray-100 text-gray-500 hover:bg-gray-200 ";
+
+                                    return (
+                                        <button 
+                                            key={q.id} 
+                                            onClick={() => { setCurrentQuestionIndex(idx); setShowExplanation(false); closeGrid(); }}
+                                            className={btnClass}
+                                        >
+                                            {idx + 1}
+                                            {isMarked && <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border border-white"></span>}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            if (currentScreen === 'home') return (
+                <div className="flex flex-col items-center justify-center h-full p-6 space-y-8 animate-fade-in bg-gradient-to-br from-blue-50 to-indigo-50">
+                    <div className="text-center space-y-4 max-w-lg">
+                        <div className="bg-white p-6 rounded-2xl shadow-lg inline-block mb-2">
+                            <Icons.BookOpen size={64} className="text-blue-600" />
+                        </div>
+                        <h1 className="text-4xl font-extrabold text-gray-800 tracking-tight">108課綱學測國文</h1>
+                        <p className="text-xl text-gray-600 font-medium">全選擇題模擬系統 (500題版)</p>
+                        <div className="flex flex-wrap justify-center gap-2 mt-4">
+                           <span className="px-3 py-1 bg-white border border-gray-200 rounded-full text-sm text-gray-500">字音字形</span>
+                           <span className="px-3 py-1 bg-white border border-gray-200 rounded-full text-sm text-gray-500">閱讀題組</span>
+                           <span className="px-3 py-1 bg-white border border-gray-200 rounded-full text-sm text-gray-500">混合題型</span>
+                        </div>
+                    </div>
+                    <div className="w-full max-w-sm">
+                        <button 
+                            onClick={startExam}
+                            className="w-full flex items-center justify-center p-5 bg-blue-600 text-white rounded-xl shadow-lg hover:bg-blue-700 hover:shadow-xl transition transform hover:-translate-y-1 group"
+                        >
+                            <div className="bg-white/20 p-2 rounded-full mr-3 group-hover:scale-110 transition">
+                                <Icons.Zap size={24} className="text-white" />
+                            </div>
+                            <div className="text-left">
+                                <span className="block font-bold text-xl">開始刷題</span>
+                                <span className="text-sm text-blue-100">500題庫 • 無壓力模式</span>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            );
+
+            if (currentScreen === 'result') {
+                const { rawScore, total, rank, percentage } = calculateScore();
+                return (
+                    <div className="flex flex-col items-center h-full bg-gray-50 p-6 overflow-y-auto">
+                        <div className="w-full max-w-md space-y-6 mt-8">
+                            <div className="bg-white rounded-3xl shadow-xl p-8 text-center relative overflow-hidden">
+                                <h2 className="text-3xl font-extrabold text-gray-800 mb-2">練習完成</h2>
+                                <div className="flex justify-center my-8">
+                                    <div className="text-6xl font-black text-gray-800">{percentage.toFixed(0)}<span className="text-2xl text-gray-400 font-normal">分</span></div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4 text-left">
+                                    <div className="bg-blue-50 p-4 rounded-2xl">
+                                        <p className="text-xs text-blue-400 font-bold mb-1">答對題數</p>
+                                        <p className="text-2xl font-bold text-blue-900">{rawScore} / {total}</p>
+                                    </div>
+                                    <div className="bg-indigo-50 p-4 rounded-2xl">
+                                        <p className="text-xs text-indigo-400 font-bold mb-1">模擬級分</p>
+                                        <p className="text-2xl font-bold text-indigo-900">{rank}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="space-y-3">
+                                <button onClick={() => setCurrentScreen('home')} className="w-full bg-gray-800 hover:bg-gray-900 text-white py-4 rounded-2xl font-bold shadow-lg transition flex items-center justify-center space-x-2">
+                                    <Icons.RotateCcw size={20} /> <span>返回首頁</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                );
             }
-        });
 
-        // 6. 國寫題目 (目標: 70題 = 20歷屆 + 50模擬)
-        // Part A: 歷屆題目 (20)
-        WRITING_TOPICS.forEach((item, idx) => {
-            QUESTION_DB.push({ 
-                id: `WRITING_${idx+1}`, 
-                subject: '國寫', category: '歷屆試題', type: 'writing', 
-                text: `【國寫試題 ${idx+1}】\n題目：${item.t}\n\n說明：${item.hint}`, 
-                answer: item.a, explanation: "" 
-            });
-        });
-        
-        // Part B: 模擬生成題目 (50)
-        const simThemes = ["自我成長", "人際關係", "社會現象", "科技反思", "生命價值"];
-        const simTypes = ["論說文", "記敘文", "抒情文"];
-        for(let i=1; i<=50; i++) {
-            const theme = simThemes[i % simThemes.length];
-            const type = simTypes[i % simTypes.length];
-            QUESTION_DB.push({
-                id: `WRITING_SIM_${i}`,
-                subject: '國寫', category: '歷屆試題', type: 'writing',
-                text: `【國寫模擬題 ${i}】\n題目：關於${theme}的一次${type}練習\n\n說明：請針對「${theme}」主題，結合自身經驗，撰寫一篇${type}。`,
-                answer: `【模擬閱卷解析】\n此題為${theme}主題的寫作練習。\n1. ${type}重點：${type==='論說文'?'論點需清晰，論據需有力':'情感需真摯，描寫需細膩'}。\n2. 建議從生活中的小事切入，避免空泛議論。\n3. 結尾宜昇華至對人生的普遍思考。`,
-                explanation: ""
-            });
+            const q = questions[currentQuestionIndex];
+            if (!q) return <div className="flex items-center justify-center h-full text-xl text-gray-500">載入題庫中...</div>;
+
+            const isMulti = q.type === 'multi' || (q.correctAnswer && q.correctAnswer.length > 1);
+            const currentAns = userAnswers[q.id] || [];
+            const isMarked = markedQuestions.has(q.id);
+
+            return (
+                <div className="flex flex-col h-full bg-gray-50 relative">
+                    {showGrid && <QuestionGrid closeGrid={() => setShowGrid(false)} />}
+                    <div className="bg-white shadow-sm px-4 py-3 flex justify-between items-center sticky top-0 z-10 border-b border-gray-100">
+                        <div className="flex items-center space-x-3">
+                            <button onClick={() => setCurrentScreen('home')} className="p-2 hover:bg-gray-100 rounded-lg text-gray-500">
+                                <Icons.Home size={20} />
+                            </button>
+                            <button onClick={() => setShowGrid(true)} className="flex items-center space-x-2 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg transition text-gray-700 font-medium">
+                                <Icons.Grid size={18} />
+                                <span>{currentQuestionIndex + 1} / {questions.length}</span>
+                            </button>
+                        </div>
+                        <button onClick={toggleMarkQuestion} className={`p-2 rounded-lg transition ${isMarked ? 'bg-red-100 text-red-500' : 'text-gray-400 hover:bg-gray-100'}`}>
+                            <Icons.Flag size={20} fill={isMarked ? "currentColor" : "none"} />
+                        </button>
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto p-4 md:p-6 max-w-4xl mx-auto w-full scroll-smooth">
+                        {q.isGroup && (
+                            <div className="bg-white rounded-xl p-6 mb-6 shadow-sm border-l-4 border-indigo-500">
+                                <div className="flex items-center justify-between mb-3">
+                                    <h3 className="font-bold text-lg text-indigo-900">{q.groupTitle}</h3>
+                                    <span className="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded">閱讀題組</span>
+                                </div>
+                                <div className="prose prose-sm md:prose-base max-w-none text-gray-700 leading-relaxed whitespace-pre-wrap font-serif">
+                                    {q.groupContent}
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="bg-white rounded-xl p-6 shadow-sm ring-1 ring-gray-100">
+                            <div className="flex items-center space-x-2 mb-4">
+                                <span className={`text-xs font-bold px-2 py-1 rounded ${isMulti ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'}`}>
+                                    {isMulti ? '多選題' : '單選題'}
+                                </span>
+                                <span className="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded">
+                                    {q.category}
+                                </span>
+                                {q.isReview && <span className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded border border-amber-200 flex items-center animate-pulse"><Icons.Flag size={12} className="mr-1" /> 複習變體</span>}
+                            </div>
+
+                            <h2 className="text-xl font-medium text-gray-900 mb-8 leading-relaxed">
+                                {q.text}
+                            </h2>
+
+                            <div className="space-y-4">
+                                {q.options.map((option, idx) => {
+                                    const isSelected = currentAns.includes(idx);
+                                    let btnClass = "w-full text-left p-4 rounded-xl border-2 transition-all flex items-start space-x-4 relative overflow-hidden ";
+                                    if (showExplanation) {
+                                        if (q.correctAnswer.includes(idx)) btnClass += "border-green-500 bg-green-50 text-green-900";
+                                        else if (isSelected) btnClass += "border-red-500 bg-red-50 text-red-900";
+                                        else btnClass += "border-gray-100 text-gray-400 opacity-60";
+                                    } else {
+                                        if (isSelected) btnClass += "border-blue-500 bg-blue-50 text-blue-900 shadow-md transform scale-[1.01]";
+                                        else btnClass += "border-gray-200 hover:border-blue-300 hover:bg-gray-50 text-gray-700";
+                                    }
+
+                                    return (
+                                        <button key={idx} onClick={() => handleAnswerSelect(idx, isMulti)} className={btnClass} disabled={showExplanation}>
+                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-sm font-bold border-2 transition-colors ${
+                                                isSelected ? 'bg-blue-500 border-blue-500 text-white' : 'border-gray-300 text-gray-500'
+                                            } ${showExplanation && q.correctAnswer.includes(idx) ? '!bg-green-500 !border-green-500 !text-white' : ''}`}>
+                                                {String.fromCharCode(65 + idx)}
+                                            </div>
+                                            <span className="pt-1">{option}</span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+
+                            {showExplanation && (
+                                <div className="mt-8 bg-yellow-50 p-5 rounded-xl border border-yellow-200 animate-fade-in-up">
+                                    <div className="flex items-center space-x-2 text-yellow-800 font-bold mb-3">
+                                        <Icons.Award size={20} />
+                                        <span>解析與詳解</span>
+                                    </div>
+                                    <p className="text-gray-800 leading-relaxed">{q.explanation}</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="bg-white border-t border-gray-100 p-4 flex justify-between items-center safe-area-bottom">
+                        <button 
+                            onClick={() => { setShowExplanation(false); setCurrentQuestionIndex(prev => Math.max(0, prev - 1)); }}
+                            disabled={currentQuestionIndex === 0}
+                            className="flex items-center space-x-2 px-4 py-2 rounded-full text-gray-600 hover:bg-gray-100 disabled:opacity-30 transition"
+                        >
+                            <Icons.ChevronLeft size={20} /> <span>上一題</span>
+                        </button>
+                        {!showExplanation ? (
+                            isMulti ? (
+                                <button onClick={() => setShowExplanation(true)} className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-2.5 rounded-full font-bold shadow-md transition">
+                                    確認答案
+                                </button>
+                            ) : (
+                                <span className="text-sm text-gray-400 font-medium hidden md:block animate-pulse">請點選選項</span>
+                            )
+                        ) : (
+                            <button 
+                                onClick={() => {
+                                    if (currentQuestionIndex < questions.length - 1) { setShowExplanation(false); setCurrentQuestionIndex(prev => prev + 1); } 
+                                    else { setCurrentScreen('result'); setShowGrid(false); }
+                                }}
+                                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-2.5 rounded-full font-bold shadow-md flex items-center transition"
+                            >
+                                {currentQuestionIndex === questions.length - 1 ? '查看成績' : '下一題'} <Icons.ChevronRight size={18} className="ml-1"/>
+                            </button>
+                        )}
+                        {(!showExplanation && !isMulti) && <div className="w-20 md:hidden"></div>}
+                    </div>
+                </div>
+            );
         }
-    }
 
-    generateUniqueDatabase();
-
-    // --- App 狀態管理 ---
-    const state = { view: 'home', currentSubject: null, currentCategory: null, quizList: [], currentIndex: 0, userSelection: [] };
-    const app = document.getElementById('appContent');
-    const headerTitle = document.getElementById('headerTitle');
-    const backBtn = document.getElementById('backBtn');
-    const footer = document.getElementById('footerActions');
-
-    // --- 渲染函數 ---
-    function renderHome() {
-        state.view = 'home'; state.currentSubject = null; headerTitle.innerText = "108課綱學測國文全攻略 (增量版)";
-        backBtn.classList.add('hidden'); footer.classList.add('hidden');
-        app.innerHTML = `
-            <div class="grid-container">
-                <div class="card-btn" onclick="goToSubMenu('國文')"><i class="fas fa-book-open"></i><h3>國文</h3><p>基礎語文能力</p><div class="progress-bar" style="width: ${calcProgress('國文').percent}%"></div></div>
-                <div class="card-btn" onclick="goToSubMenu('國綜')"><i class="fas fa-scroll"></i><h3>國綜</h3><p>綜合閱讀理解</p><div class="progress-bar" style="width: ${calcProgress('國綜').percent}%"></div></div>
-                <div class="card-btn" onclick="goToSubMenu('國寫')"><i class="fas fa-pen-nib"></i><h3>國寫</h3><p>情意與知性</p><div class="progress-bar" style="width: ${calcProgress('國寫').percent}%"></div></div>
-            </div>`;
-    }
-
-    function goToSubMenu(subject) {
-        state.currentSubject = subject; state.view = 'subMenu'; backBtn.classList.remove('hidden'); headerTitle.innerText = subject;
-        if (subject === '國寫') { startQuiz('國寫', '歷屆試題'); return; }
-
-        let categories = ['是非題', '單選題', '複選題', '古文'];
-        if (subject === '國文') categories.push('文章賞析'); 
-
-        let html = `<div class="grid-container grid-2-col">`;
-        categories.forEach(cat => {
-            const p = calcProgress(subject, cat);
-            const isDone = (p.total - p.done) === 0;
-            html += `<div class="card-btn" onclick="startQuiz('${subject}', '${cat}')">
-                <i class="fas ${isDone?'fa-check-circle':'fa-list-check'}" style="color:${isDone?'var(--success)':'var(--primary)'}"></i>
-                <h3>${cat}</h3><p>${isDone?'已完成':`剩餘 ${p.total-p.done} 題`}</p>
-                <div class="progress-bar" style="width: ${p.percent}%"></div></div>`;
-        });
-        html += `</div>`;
-        app.innerHTML = html;
-    }
-
-    function startQuiz(subject, category) {
-        state.view = 'quiz'; state.currentCategory = category; state.currentIndex = 0;
-        const available = QUESTION_DB.filter(q => q.subject === subject && q.category === category && !USER_PROGRESS.has(q.id));
-        if (available.length === 0) { 
-            const total = QUESTION_DB.filter(q => q.subject === subject && q.category === category).length;
-            if(total > 0) showModal('恭喜完成！', '重置進度？', '重置', () => resetCategory(subject, category), true);
-            return; 
-        }
-        state.quizList = available;
-        if (subject !== '國寫' && category !== '文章賞析') shuffleArray(state.quizList);
-        renderQuestion();
-    }
-
-    function resetCategory(subject, category) {
-        QUESTION_DB.filter(q => q.subject === subject && q.category === category).forEach(q => USER_PROGRESS.delete(q.id));
-        closeModal(); startQuiz(subject, category);
-    }
-
-    function renderQuestion() {
-        if (state.currentIndex >= state.quizList.length) { showModal('本輪結束', '返回目錄', '返回', () => { closeModal(); goToSubMenu(state.currentSubject); }, false); return; }
-        
-        const q = state.quizList[state.currentIndex];
-        state.userSelection = [];
-        headerTitle.innerText = q.category;
-        footer.classList.remove('hidden');
-        footer.innerHTML = `<button id="submitBtn" class="btn btn-primary" onclick="submitAnswer()">提交答案</button><button id="nextBtn" class="btn btn-secondary hidden" onclick="nextQuestion()">下一題</button>`;
-
-        let html = `<div class="question-container">
-            <div class="q-meta"><span class="q-badge">${q.subject} • ${q.category}</span><span class="q-counter">ID: ${q.id.split('_').pop()}</span></div>`;
-        
-        if (q.category === '文章賞析') {
-            html += `<div class="article-box">
-                <div class="article-title">${q.articleTitle}</div>
-                <div class="article-content">${q.articleContent}</div>
-            </div>`;
-        }
-
-        html += `<div class="q-text">${q.text}</div>`;
-
-        if (q.type === 'writing') {
-            html += `<div class="writing-wrapper"><textarea id="writingInput" class="writing-area" placeholder="請作答..." oninput="updateCharCount(this)"></textarea><div id="charCount" class="char-count">0 字</div></div>`;
-        } else {
-            html += `<div class="options-group">` + q.options.map((o, i) => 
-                `<div class="option-item" onclick="selectOption(this, '${String.fromCharCode(65+i)}', '${q.type}')" data-key="${String.fromCharCode(65+i)}">
-                <div class="option-key">${String.fromCharCode(65+i)}</div><div class="option-content">${o}</div></div>`
-            ).join('') + `</div>`;
-        }
-        html += `<div id="resultPanel" class="result-panel"><div class="res-header" id="resHeader"></div><div class="res-body" id="resBody"></div></div></div>`;
-        app.innerHTML = html; app.scrollTop = 0;
-    }
-
-    window.selectOption = function(el, key, type) {
-        if (document.getElementById('resultPanel').style.display === 'block') return;
-        if (type === 'multi') {
-            el.classList.toggle('selected');
-            state.userSelection.includes(key) ? state.userSelection = state.userSelection.filter(k=>k!==key) : state.userSelection.push(key);
-        } else {
-            document.querySelectorAll('.option-item').forEach(i=>i.classList.remove('selected'));
-            el.classList.add('selected'); state.userSelection = [key];
-        }
-    };
-    
-    window.updateCharCount = (t) => document.getElementById('charCount').innerText = `${t.value.length} 字`;
-
-    window.submitAnswer = function() {
-        const q = state.quizList[state.currentIndex];
-        if (q.type !== 'writing' && state.userSelection.length === 0) return;
-        USER_PROGRESS.add(q.id);
-        
-        const panel = document.getElementById('resultPanel');
-        panel.style.display = 'block';
-        
-        if (q.type === 'writing') {
-            panel.className = 'result-panel analysis';
-            document.getElementById('resHeader').innerHTML = '閱卷解析';
-            document.getElementById('resBody').innerText = q.answer;
-        } else {
-            const isCorrect = state.userSelection.sort().join('') === (Array.isArray(q.answer) ? q.answer.sort().join('') : q.answer);
-            panel.className = 'result-panel ' + (isCorrect ? 'correct' : 'wrong');
-            document.getElementById('resHeader').innerHTML = isCorrect ? '答對了' : '答錯了';
-            document.getElementById('resBody').innerHTML = `正確答案：<b>${Array.isArray(q.answer)?q.answer.join(','):q.answer}</b><br>${q.explanation}`;
-            
-            document.querySelectorAll('.option-item').forEach(item => {
-                const k = item.getAttribute('data-key');
-                const ans = q.answer;
-                if (Array.isArray(ans) ? ans.includes(k) : ans === k) item.classList.add('correct-mark');
-                else if (state.userSelection.includes(k)) item.classList.add('wrong-mark');
-            });
-        }
-        document.getElementById('submitBtn').classList.add('hidden');
-        document.getElementById('nextBtn').classList.remove('hidden');
-        setTimeout(() => app.scrollTo({ top: app.scrollHeight, behavior: 'smooth' }), 100);
-    };
-
-    window.nextQuestion = () => { state.currentIndex++; renderQuestion(); };
-    window.handleBack = () => { if(state.view==='quiz') showModal('結束？', '進度不保存', '退出', confirmGoHome, true); else renderHome(); };
-    window.showModal = (t, m, b, a, c) => { 
-        document.getElementById('modalTitle').innerText = t; document.getElementById('modalMsg').innerText = m;
-        const btn = document.getElementById('modalConfirmBtn'); btn.innerText = b; btn.onclick = a;
-        document.getElementById('modalCancelBtn').style.display = c ? 'block' : 'none';
-        document.getElementById('genericModal').classList.remove('hidden');
-    };
-    window.closeModal = () => document.getElementById('genericModal').classList.add('hidden');
-    window.confirmGoHome = () => { closeModal(); renderHome(); };
-    
-    function calcProgress(s, c) {
-        const list = c ? QUESTION_DB.filter(q => q.subject === s && q.category === c) : QUESTION_DB.filter(q => q.subject === s);
-        const done = list.filter(q => USER_PROGRESS.has(q.id)).length;
-        return { total: list.length, done, percent: list.length ? (done/list.length)*100 : 0 };
-    }
-    
-    function shuffleArray(arr) { for(let i=arr.length-1; i>0; i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } return arr; }
-
-    renderHome();
-</script>
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<ChineseExamApp />);
+    </script>
 </body>
 </html>
